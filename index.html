@@ -164,6 +164,21 @@ var nis = function(n){ return '₪' + Math.round(n||0).toLocaleString('he-IL'); 
 var esc = function(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); };
 var catColor = function(c){ return CAT_COLORS[c] || CAT_COLORS['אחר']; };
 var people = function(g){ return (+g.adults||0) + (+g.kids||0); };
+var DEFAULT_SETTINGS = {'תאריך החתונה':'2026-12-17', 'תקציב מתוכנן':160000};
+
+// טלפונים: גוגל שיטס בולעת את ה-0 המוביל ("0527283843" נשמר כמספר 527283843).
+// מחזירים את האפס ומאחדים לפורמט אחיד — נייד 052-7283843, קווי 03-6721145.
+function fixPhone(p){
+  p = String(p==null?'':p).trim();
+  if (!p) return '';
+  if (/[^\d\-\s()]/.test(p)) return p;            // +972, שלוחה, טקסט חופשי — משאירים כמו שהוא
+  var d = p.replace(/\D/g, '');
+  if (d.length === 9 && d.charAt(0) !== '0') d = '0' + d;   // 527283843 → 0527283843
+  if (d.length === 8 && d.charAt(0) !== '0') d = '0' + d;   // 36721145  → 036721145
+  if (d.length === 10 && d.charAt(0) === '0') return d.slice(0,3) + '-' + d.slice(3);
+  if (d.length === 9  && d.charAt(0) === '0') return d.slice(0,2) + '-' + d.slice(2);
+  return p;                                       // מוקד 1-700, קיצור *2020 וכו׳
+}
 
 /* ─────────────── מצב ─────────────── */
 var CFG = load(LS_CFG, {token:'', auto:true});
@@ -176,7 +191,7 @@ var S = {
   syncOpen:false, importMsg:'', syncMsg:'', conflict:false,
   net:'off', /* off | ok | saving | error */ netMsg:'',
   guests:[], vendors:[], venues:[], tasks:[], tables:[], files:[],
-  settings:{'תאריך החתונה':'2026-12-17','תקציב מתוכנן':160000}, rev:0
+  settings:Object.assign({}, DEFAULT_SETTINGS), rev:0
 };
 var cached = load(LS_DATA, null);
 if (cached) Object.assign(S, cached);
@@ -245,11 +260,15 @@ function pull(){
   setNet('saving','טוען…');
   return api('load').then(function(j){
     var d = j.data;
-    S.guests  = (d.guests||[]).map(function(g){ g.arrived=!!g.arrived; return g; });
-    S.vendors = d.vendors||[]; S.venues = d.venues||[]; S.files = d.files||[];
+    S.guests  = (d.guests||[]).map(function(g){ g.arrived=!!g.arrived; g.phone=fixPhone(g.phone); return g; });
+    S.vendors = (d.vendors||[]).map(function(x){ x.contact = fixPhone(x.contact); return x; });
+    S.venues = d.venues||[]; S.files = d.files||[];
     S.tasks   = (d.tasks||[]).map(function(t){ t.done=!!t.done; return t; });
     S.tables  = (d.tables||[]).map(function(t){ t.shape = SHAPES[t.shape] || t.shape || 'round'; return t; });
-    S.settings = d.settings||S.settings; S.rev = d.rev||0;
+    // מיזוג ולא החלפה: אם חסרה שורה בלשונית "הגדרות" נשארת ברירת המחדל,
+    // והיא נכתבת חזרה לגיליון בשמירה הבאה.
+    S.settings = Object.assign({}, DEFAULT_SETTINGS, S.settings, d.settings||{});
+    S.rev = d.rev||0;
     S.folderUrl = d.folderUrl||''; S.sheetUrl = d.sheetUrl||'';
     S.conflict = false; pending = false;
     persist(); setNet('ok','סונכרן ' + new Date().toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'}));
@@ -877,14 +896,14 @@ var ACT = {
   'fRsvp': function(el){ S.fRsvp = el.value; return true; },
   'more':  function(){ S.limit += 50; return true; },
 
-  'g.name': f('guests','name'), 'g.category': f('guests','category'), 'g.phone': f('guests','phone'),
+  'g.name': f('guests','name'), 'g.category': f('guests','category'), 'g.phone': fPhone('guests','phone'),
   'g.notes': f('guests','notes'), 'g.side': f('guests','side'), 'g.rsvp': f('guests','rsvp'),
   'g.adults': f('guests','adults','n'), 'g.kids': f('guests','kids','n'), 'g.gift': f('guests','gift','n'),
   'g.arrived': function(el){ upd('guests', el.dataset.id, {arrived:el.checked}); return true; },
   'g.del': function(el){ del('guests', el.dataset.id); return true; },
   'g.add': function(){ S.guests.unshift({id:uid(),name:'',side:SIDE_A,category:'חברים',phone:'',adults:1,kids:0,rsvp:'טרם',arrived:false,gift:0,table:'',notes:''}); touch(); return true; },
 
-  'v.type': f('vendors','type'), 'v.name': f('vendors','name'), 'v.contact': f('vendors','contact'),
+  'v.type': f('vendors','type'), 'v.name': f('vendors','name'), 'v.contact': fPhone('vendors','contact'),
   'v.when': f('vendors','when'), 'v.method': f('vendors','method'), 'v.notes': f('vendors','notes'),
   'v.advance': f('vendors','advance','n'), 'v.total': f('vendors','total','n'), 'v.status': f('vendors','status'),
   'v.del': function(el){ del('vendors', el.dataset.id); return true; },
@@ -964,6 +983,14 @@ function f(coll, key, type){
     var patch = {}; patch[key] = type==='n' ? (+el.value||0) : el.value;
     upd(coll, el.dataset.id, patch);
     return false;   // הציור מחדש קורה באירוע change, כדי לא לקטוע הקלדה
+  };
+}
+// שדה טלפון: תוך כדי הקלדה נשמר כמו שהוא, וביציאה מהשדה מסודר ל-052-1234567
+function fPhone(coll, key){
+  return function(el, evt){
+    var patch = {}; patch[key] = evt==='change' ? fixPhone(el.value) : el.value;
+    upd(coll, el.dataset.id, patch);
+    return false;
   };
 }
 
@@ -1074,7 +1101,7 @@ function sheetToGuests(rows, sideHint){
     var arr = String(pick(r,['הגיעו','הגיע'])).trim();
     out.push({ id:uid(), name:full, side:side,
       category:String(pick(r,['קטגוריה'])).trim()||'אחר',
-      phone:String(pick(r,['מספר טלפון','טלפון'])).trim(),
+      phone:fixPhone(pick(r,['מספר טלפון','טלפון'])),
       adults:+pick(r,['כמות','מבוגרים'])||1, kids:+pick(r,['ילדים'])||0,
       rsvp:String(pick(r,['אישור'])).trim()||'טרם',
       arrived:(arr==='V'||arr==='v'||arr==='כן'),

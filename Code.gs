@@ -316,6 +316,12 @@ function setup() {
       .setFontWeight('bold').setBackground('#3E5D50').setFontColor('#F5F2ED');
     sh.setFrozenRows(1);
     sh.hideColumns(1); // עמודת id – טכנית
+    // עמודות טקסט (טלפון, איש קשר, id…) מקבלות פורמט "טקסט רגיל",
+    // אחרת גוגל מזהה 0527283843 כמספר ובולעת את ה-0 המוביל.
+    var rows = Math.max(sh.getMaxRows() - 1, 1);
+    def.types.forEach(function (t, i) {
+      if (t === 's') sh.getRange(2, i + 1, rows, 1).setNumberFormat('@');
+    });
     if (fresh && SEED[name]) SEED[name].forEach(function (r) { appendRow(def, r); });
     sh.autoResizeColumns(2, def.cols.length - 1);
   });
