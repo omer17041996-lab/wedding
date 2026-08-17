@@ -2,7 +2,11 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#3E5D50">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="החתונה">
 <title>עומר & נועה · לוח ניהול החתונה</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -100,6 +104,25 @@
   .box h4{margin:0 0 4px;font-size:14px}
   .box p{margin:0 0 12px;font-size:12px;color:var(--muted);line-height:1.6}
 
+  /* מסך כניסה */
+  .gate{position:fixed;inset:0;background:#3E5D50;display:flex;align-items:center;justify-content:center;padding:24px}
+  .gatecard{width:390px;max-width:100%;text-align:center;animation:fadeUp .3s ease}
+  .gatecard .ring{width:96px;height:96px;margin:0 auto 22px;border:4px solid rgba(245,242,237,.5);border-radius:50%;
+                  display:flex;align-items:center;justify-content:center;background:#F5F2ED}
+  .gatecard .ring b{font-family:'Frank Ruhl Libre',serif;font-size:26px;color:#3E5D50}
+  .gatecard h1{font-family:'Frank Ruhl Libre',serif;font-size:30px;font-weight:700;color:#F5F2ED;margin:0 0 4px}
+  .gatecard h1 em{color:#D9A184;font-style:normal;font-size:22px}
+  .gatecard .sub{color:rgba(245,242,237,.62);font-size:14px;margin-bottom:28px}
+  .gatecard input{width:100%;border:1px solid rgba(245,242,237,.3);background:rgba(255,255,255,.08);color:#F5F2ED;
+                  border-radius:12px;padding:14px 16px;font-size:16px;text-align:center;letter-spacing:2px}
+  .gatecard input::placeholder{color:rgba(245,242,237,.45);letter-spacing:0}
+  .gatecard input:focus{outline:2px solid #D9A184;outline-offset:0}
+  .gatecard button{width:100%;margin-top:12px;border:none;border-radius:12px;padding:14px;font-size:15px;
+                   font-weight:700;background:#F5F2ED;color:#3E5D50;cursor:pointer}
+  .gatecard button:disabled{opacity:.55;cursor:default}
+  .gatecard .err{color:#F0B9A0;font-size:13px;min-height:20px;margin-top:12px}
+  .gatecard .hint{color:rgba(245,242,237,.45);font-size:12px;margin-top:6px;line-height:1.7}
+
   /* status */
   .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
   .status{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted)}
@@ -132,6 +155,10 @@ var SHAPES = {'עגול':'round','מרובע':'square','מלבני':'rect','אר
 var SHAPE_HE = {round:'עגול',square:'מרובע',rect:'מלבני',long:'ארוך'};
 var LS_DATA = 'wedding-data-v2', LS_CFG = 'wedding-cfg-v2';
 
+/* כתובת ה-Web app של Apps Script — מוטמעת בקובץ, המשתמש לא נוגע בה.
+   ההגנה היא הסיסמה, שנשמרת רק במכשיר של המשתמש ולא נמצאת בקוד. */
+var API_URL = 'https://script.google.com/macros/s/AKfycbwlO5dX_T-c---p98yMzQCK-xRzAMUCmud9SLNbpOpkuTwaE-Fjzxwv7qu5U71aEW_I/exec';
+
 var uid = function(){ return Math.random().toString(36).slice(2,9); };
 var nis = function(n){ return '₪' + Math.round(n||0).toLocaleString('he-IL'); };
 var esc = function(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); };
@@ -139,7 +166,9 @@ var catColor = function(c){ return CAT_COLORS[c] || CAT_COLORS['אחר']; };
 var people = function(g){ return (+g.adults||0) + (+g.kids||0); };
 
 /* ─────────────── מצב ─────────────── */
-var CFG = load(LS_CFG, {api:'', token:'', auto:true});
+var CFG = load(LS_CFG, {token:'', auto:true});
+var authed = !!CFG.token;          // האם המכשיר הזה כבר עבר סיסמה
+var gateMsg = '', gateBusy = false;
 var S = {
   view:'overview', search:'', fSide:'all', fCat:'all', fRsvp:'all', limit:50,
   bankSearch:'', newShape:'round', newSeats:'12', selectedTable:null,
@@ -168,9 +197,9 @@ function snapshot(){
 
 /* ─────────────── שרת ─────────────── */
 function api(action, extra){
-  if (!CFG.api) return Promise.reject(new Error('לא מחובר לדרייב'));
+  if (!CFG.token) return Promise.reject(new Error('לא מחובר'));
   var body = Object.assign({action:action, token:CFG.token}, extra||{});
-  return fetch(CFG.api, {
+  return fetch(API_URL, {
     method:'POST',
     headers:{'Content-Type':'text/plain;charset=utf-8'}, // מונע preflight — Apps Script לא תומך ב-OPTIONS
     body:JSON.stringify(body),
@@ -184,13 +213,13 @@ function api(action, extra){
 var saveTimer = null, pending = false, inFlight = false, queued = false, saveSeq = 0;
 function touch(){                       // נקרא אחרי כל שינוי מקומי
   persist();
-  if (!CFG.api || !CFG.auto) return;
+  if (!CFG.token || !CFG.auto) return;
   pending = true;
   clearTimeout(saveTimer);
   saveTimer = setTimeout(function(){ pushNow(); }, 1500);
 }
 function pushNow(force){
-  if (!CFG.api) return Promise.resolve();
+  if (!CFG.token) return Promise.resolve();
   clearTimeout(saveTimer);
   // אף פעם לא שולחים שתי שמירות במקביל. אחרת השנייה יוצאת עם מספר גרסה ישן
   // (הראשונה עוד לא חזרה עם החדש) והשרת חושב בטעות שמישהו ערך את הגיליון מבחוץ.
@@ -212,7 +241,7 @@ function pushNow(force){
   });
 }
 function pull(){
-  if (!CFG.api) return Promise.reject(new Error('לא מחובר'));
+  if (!CFG.token) return Promise.reject(new Error('לא מחובר'));
   setNet('saving','טוען…');
   return api('load').then(function(j){
     var d = j.data;
@@ -231,7 +260,7 @@ function setNet(state, msg){ S.net = state; S.netMsg = msg||''; paintStatus(); }
 
 /* בדיקה תקופתית — אם מישהו ערך את הגיליון, מציעים לרענן */
 setInterval(function(){
-  if (!CFG.api || document.hidden || pending || inFlight || S.conflict) return;
+  if (!CFG.token || document.hidden || pending || inFlight || S.conflict) return;
   var seq = saveSeq;                                   // אם שמירה שלנו הסתיימה בינתיים,
   api('rev').then(function(j){                         // המספר שקיבלנו כבר לא רלוונטי
     if (seq !== saveSeq || pending || inFlight) return;
@@ -240,7 +269,7 @@ setInterval(function(){
 }, 30000);
 
 window.addEventListener('beforeunload', function(e){
-  if (pending && CFG.api){ e.preventDefault(); e.returnValue = ''; }
+  if (pending && CFG.token){ e.preventDefault(); e.returnValue = ''; }
 });
 
 /* ─────────────── עזרי נתונים ─────────────── */
@@ -278,7 +307,48 @@ function stats(){
 var VIEWS = [['overview','סקירה'],['guests','מוזמנים'],['seating','סידור שולחנות'],['vendors','ספקים'],
              ['venues','מקומות'],['tasks','משימות'],['budget','תקציב'],['gifts','מתנות']];
 
+/* ─────────────── מסך כניסה ─────────────── */
+function renderGate(){
+  document.getElementById('app').innerHTML =
+    '<div class="gate"><div class="gatecard">' +
+      '<div class="ring"><b>ע &amp; נ</b></div>' +
+      '<h1>עומר <em>&amp;</em> נועה</h1>' +
+      '<div class="sub">לוח ניהול החתונה</div>' +
+      '<input type="password" id="gatepw" inputmode="text" autocomplete="current-password" ' +
+        'placeholder="הזינו סיסמה"' + (gateBusy ? ' disabled' : '') + '>' +
+      '<button data-act="gate.enter"' + (gateBusy ? ' disabled' : '') + '>' +
+        (gateBusy ? 'בודק…' : 'כניסה') + '</button>' +
+      '<div class="err">' + esc(gateMsg) + '</div>' +
+      '<div class="hint">הסיסמה נשמרת במכשיר הזה בלבד.<br>בפעם הבאה שתיכנסו — לא תתבקשו שוב.</div>' +
+    '</div></div>';
+  var pw = document.getElementById('gatepw');
+  if (pw && !gateBusy) pw.focus();
+}
+function tryLogin(){
+  var box = document.getElementById('gatepw');
+  var pw = box ? box.value.trim() : '';
+  if (!pw){ gateMsg = 'צריך להזין סיסמה'; renderGate(); return; }
+  gateMsg = ''; gateBusy = true; renderGate();
+  CFG.token = pw; authed = true;
+  pull().then(function(){
+    persist();                       // הסיסמה נשמרת רק אחרי שהשרת אישר אותה
+  }).catch(function(e){
+    CFG.token = ''; authed = false; gateBusy = false;
+    gateMsg = /סיסמה/.test(e.message) ? 'סיסמה שגויה. נסו שוב.'
+            : 'אין חיבור לשרת — בדקו אינטרנט ונסו שוב. (' + e.message + ')';
+    renderGate();
+  });
+}
+function logout(){
+  if (!confirm('לצאת מהמכשיר הזה? הנתונים נשארים בגיליון, ובכניסה הבאה תתבקש סיסמה.')) return;
+  pushNow().then(function(){
+    try{ localStorage.removeItem(LS_DATA); localStorage.removeItem(LS_CFG); }catch(e){}
+    location.reload();
+  });
+}
+
 function render(){
+  if (!authed) return renderGate();
   var act = document.activeElement;
   var fk = act && act.dataset ? act.dataset.k : null;
   var selS = null, selE = null;
@@ -338,7 +408,7 @@ function banner(){
 function paintStatus(){
   var b = document.getElementById('netbox'); if (!b) return;
   var color = {off:'#B5AEA4', ok:'#3E5D50', saving:'#9A7B33', error:'#B4714E'}[S.net];
-  var text  = !CFG.api ? 'לא מחובר לדרייב' : (S.netMsg || 'מחובר');
+  var text  = !CFG.token ? 'לא מחובר' : (S.netMsg || 'מחובר');
   b.innerHTML = (S.net==='saving' ? '<span class="spin"></span>' : '<span class="dot" style="background:'+color+'"></span>') +
                 '<span style="color:'+color+'">'+esc(text)+'</span>';
 }
@@ -753,14 +823,14 @@ function syncModal(){
       '<button class="x" style="font-size:20px" data-act="close-sync">✕</button></div>'+
     '<div class="muted" style="margin-bottom:20px">הנתונים חיים בגיליון גוגל בתוך תיקיית הדרייב שלך. אפשר לערוך גם משם וגם מכאן.</div>'+
 
-    '<div class="box"><h4>1. חיבור לתיקיית הדרייב</h4>'+
-      '<p>הדבק את כתובת ה-Web app שקיבלת מ-Apps Script (ראה קובץ ההוראות), ואת הסיסמה שהגדרת ב-SECRET.</p>'+
-      '<input class="field" dir="ltr" style="width:100%;margin-bottom:8px" placeholder="https://script.google.com/macros/s/…/exec" data-act="cfg.api" data-k="cfgapi" value="'+esc(CFG.api)+'">'+
-      '<input class="field" dir="ltr" style="width:100%;margin-bottom:10px" placeholder="סיסמה (SECRET)" data-act="cfg.token" data-k="cfgtok" value="'+esc(CFG.token)+'">'+
+    '<div class="box"><h4>1. חיבור</h4>'+
+      '<p>המכשיר הזה מחובר לגיליון בדרייב. הנתונים נשמרים לבד תוך שנייה מכל שינוי.</p>'+
       '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">'+
-        '<button class="btn primary" data-act="pull">התחבר ומשוך נתונים</button>'+
-        '<button class="btn" data-act="push">שמור עכשיו לגיליון</button>'+
+        '<button class="btn primary" data-act="pull">טען מחדש מהגיליון</button>'+
+        '<button class="btn" data-act="push">שמור עכשיו</button>'+
         '<label style="display:flex;align-items:center;gap:6px;font-size:13px"><input type="checkbox" class="ck" data-act="cfg.auto"'+(CFG.auto?' checked':'')+'> שמירה אוטומטית</label>'+
+        '<span style="flex:1"></span>'+
+        '<button class="btn danger sm" data-act="logout">יציאה מהמכשיר</button>'+
       '</div>'+
       '<div style="font-size:12px;color:var(--green);margin-top:10px;min-height:16px">'+esc(S.syncMsg)+'</div></div>'+
 
@@ -797,9 +867,9 @@ var ACT = {
                           .catch(function(e){ S.syncMsg = 'שגיאה: '+e.message; render(); }); return false; },
   'push': function(){ pushNow().then(function(){ S.syncMsg = 'נשמר לגיליון'; render(); }); return false; },
   'force-push': function(){ pushNow(true).then(function(){ S.conflict=false; render(); }); return false; },
-  'cfg.api': function(el){ CFG.api = el.value.trim(); persist(); paintStatus(); return false; },
-  'cfg.token': function(el){ CFG.token = el.value.trim(); persist(); return false; },
   'cfg.auto': function(el){ CFG.auto = el.checked; persist(); return false; },
+  'gate.enter': function(){ tryLogin(); return false; },
+  'logout': function(){ logout(); return false; },
 
   'search': function(el){ S.search = el.value; S.limit = 50; return true; },
   'fSide': function(el){ S.fSide = el.value; return true; },
@@ -926,7 +996,7 @@ function uploadFiles(input){
   var file = input.files && input.files[0];
   input.value = '';
   if (!file) return;
-  if (!CFG.api){ alert('כדי לשמור קבצים בדרייב צריך קודם להתחבר (כפתור "סנכרון וייבוא").'); return; }
+  if (!CFG.token){ alert('כדי לשמור קבצים בדרייב צריך קודם להתחבר (כפתור "סנכרון וייבוא").'); return; }
   if (file.size > 15*1024*1024){ alert('הקובץ גדול מדי (מקסימום 15MB). העלה אותו ישירות לתיקייה בדרייב.'); return; }
   var owner = input.dataset.owner, ownerId = input.dataset.id || '';
   setNet('saving','מעלה '+file.name+'…');
@@ -941,7 +1011,7 @@ function uploadFiles(input){
 }
 function removeFile(id){
   if (!confirm('למחוק את הקובץ מהדרייב?')) return;
-  if (!CFG.api){ S.files = S.files.filter(function(f){ return f.id!==id; }); touch(); render(); return; }
+  if (!CFG.token){ S.files = S.files.filter(function(f){ return f.id!==id; }); touch(); render(); return; }
   api('delfile', {id:id}).then(function(j){
     S.files = S.files.filter(function(f){ return f.id!==id; });
     S.rev = j.rev; persist(); render();
@@ -1087,7 +1157,9 @@ app.addEventListener('change', function(e){
   if (el.type !== 'file') render();
 });
 app.addEventListener('keydown', function(e){
-  if (e.key==='Enter' && e.target.dataset && e.target.dataset.act==='newTask'){ e.preventDefault(); dispatch(e.target,'input'); ACT['task.add'](); render(); }
+  if (e.key!=='Enter') return;
+  if (e.target.id==='gatepw'){ e.preventDefault(); tryLogin(); return; }
+  if (e.target.dataset && e.target.dataset.act==='newTask'){ e.preventDefault(); dispatch(e.target,'input'); ACT['task.add'](); render(); }
 });
 
 /* גרירה: שם מהבנק → שולחן, והזזת שולחנות בקנבס */
@@ -1131,63 +1203,10 @@ app.addEventListener('pointerdown', function(e){
 });
 
 /* ═══════════════════ הפעלה ═══════════════════ */
-function seedLocal(){
-  var g = function(name,side,category,phone,adults,kids,rsvp,notes){
-    return {id:uid(),name:name,side:side,category:category,phone:phone,adults:adults,kids:kids,
-            rsvp:rsvp,arrived:false,gift:0,table:'',notes:notes||''};
-  };
-  S.guests = [
-    g('משפחת לוי - דוד ורונית',SIDE_A,'משפחה','052-4412093',2,0,'אישר','הורים של עומר'),
-    g('יעל לוי',SIDE_A,'משפחה','054-7781230',1,0,'אישר','אחות'),
-    g('סבתא מרים',SIDE_A,'משפחה','03-6721145',1,0,'אישר','להושיב קרוב לבמה'),
-    g('משפחת ברקוביץ',SIDE_A,'משפחה מורחבת','050-3312876',2,2,'טרם'),
-    g('אורי כהן',SIDE_A,'צבא','052-9983311',2,0,'אישר'),
-    g('רון פרץ',SIDE_A,'צבא','053-2214467',1,0,'טרם'),
-    g('נדב שגיא',SIDE_A,'עבודה','054-1120934',2,0,'אישר','מנהל הצוות'),
-    g('שירה אלון',SIDE_A,'עבודה','058-7712340',1,0,'טרם'),
-    g('גיא ומאיה',SIDE_A,'חברים','050-4483321',2,1,'אישר'),
-    g('משפחת אזולאי',SIDE_B,'משפחה','052-3341290',2,0,'אישר','הורים של נועה'),
-    g('תמר אזולאי',SIDE_B,'משפחה','054-9987120',1,0,'אישר','אחות + עדה'),
-    g('דודה אילנה',SIDE_B,'משפחה מורחבת','09-7745120',2,0,'טרם'),
-    g('נועם ברק',SIDE_B,'ילדות','050-8871233',2,0,'אישר'),
-    g('הילה מזרחי',SIDE_B,'ילדות','053-4419087',1,0,'אישר'),
-    g('ליאור ואפרת',SIDE_B,'חברים','052-6612088',2,2,'טרם'),
-    g('דנה שטרן',SIDE_B,'עבודה','054-3390127',1,0,'לא מגיע','בחו״ל'),
-    g('מיכל רוזן',SIDE_B,'עבודה','058-2213099',2,0,'אישר'),
-    g('משפחת שוורץ',SIDE_B,'שכונה','050-1123998',2,3,'טרם')
-  ];
-  S.tables = [
-    {id:uid(),name:'שולחן 1',shape:'round',seats:12,x:60,y:50},
-    {id:uid(),name:'שולחן 2',shape:'round',seats:12,x:280,y:50},
-    {id:uid(),name:'שולחן 3',shape:'square',seats:8,x:500,y:60},
-    {id:uid(),name:'שולחן אבירים',shape:'long',seats:20,x:60,y:300}
-  ];
-  S.vendors = [
-    {id:uid(),type:'די ג׳יי',name:'פרץ גלאס',contact:'052-5446859',advance:1000,total:8500,when:'עד שבוע אחרי',method:'העברה בנקאית',status:'נסגר',notes:''},
-    {id:uid(),type:'צלם סטילס',name:'עידן מרציאנו',contact:'054-2523442',advance:1500,total:7300,when:'חצי ביומיים אחרי',method:'העברה',status:'נסגר',notes:'כולל אלבום'},
-    {id:uid(),type:'איפור ושיער',name:'נוי שילר',contact:'054-8195800',advance:300,total:3400,when:'ביום האירוע',method:'ביט',status:'נסגר',notes:'כולל ליווי'},
-    {id:uid(),type:'עיצוב ופרחים',name:'סטודיו ורד',contact:'050-7781203',advance:0,total:6200,when:'שבוע לפני',method:'העברה',status:'בבירור',notes:''},
-    {id:uid(),type:'רב',name:'הרב שמעוני',contact:'052-3312099',advance:0,total:1500,when:'ביום האירוע',method:'מזומן',status:'בבירור',notes:''}
-  ];
-  S.venues = [
-    {id:uid(),name:'בית רבן',date:'3.06',day:'רביעי',pricePer:520,minGuests:300,extras:'13,500 תאורה והגברה',notes:'בר בתוספת 39 לאורח',status:'ביקרנו'},
-    {id:uid(),name:'בית ברל',date:'28.06',day:'ראשון',pricePer:450,minGuests:280,extras:'',notes:'גן פתוח',status:'מועדף'},
-    {id:uid(),name:'מחסיה',date:'19.06',day:'שישי',pricePer:500,minGuests:300,extras:'',notes:'רחוק יחסית',status:'לבדיקה'},
-    {id:uid(),name:'חדרה - צהריים',date:'ספטמבר',day:'שישי',pricePer:380,minGuests:250,extras:'',notes:'שישי צהריים בלבד',status:'לבדיקה'}
-  ];
-  var t = function(title,category,due,done){ return {id:uid(),title:title,category:category,due:due,done:!!done}; };
-  S.tasks = [
-    t('לסגור אולם ולחתום חוזה','אולם','2026-09-15'), t('לקבוע טעימות','אולם','2026-09-28'),
-    t('לסיים רשימת מוזמנים סופית','אורחים','2026-10-10'), t('להזמין הזמנות דיגיטליות','אורחים','2026-10-20'),
-    t('מדידות שמלה','לבוש','2026-09-05',true), t('חליפה לחתן','לבוש','2026-10-01'),
-    t('לסגור צלם וידאו','ספקים','2026-09-20'), t('לתאם עם הרב','טקס','2026-11-01'),
-    t('רישום רבנות','טקס','2026-08-30')
-  ];
-}
-if (!cached && !CFG.api) seedLocal();
+// מכשיר מוכר → מציירים מיד מהמטמון המקומי ומרעננים ברקע.
+// מכשיר חדש → מסך כניסה, והנתונים מגיעים מהגיליון אחרי שהסיסמה אושרה.
 render();
-if (CFG.api) pull().catch(function(){ /* אין רשת — עובדים מהעותק המקומי */ });
-else if (!cached) S.syncOpen = false;
+if (authed) pull().catch(function(){ /* אין רשת — עובדים מהעותק המקומי */ });
 </script>
 </body>
 </html>
