@@ -31,9 +31,9 @@ const FILES_FOLDER_NAME = 'מסמכים וחוזים';
 const SCHEMA = {
   guests: {
     sheet: 'מוזמנים',
-    cols: ['id', 'שם מלא', 'צד', 'קטגוריה', 'טלפון', 'מבוגרים', 'ילדים', 'אישור הגעה', 'הגיע', 'מתנה ₪', 'שולחן', 'הערות'],
-    keys: ['id', 'name', 'side', 'category', 'phone', 'adults', 'kids', 'rsvp', 'arrived', 'gift', 'table', 'notes'],
-    types: ['s', 's', 's', 's', 's', 'n', 'n', 's', 'b', 'n', 's', 's']
+    cols: ['id', 'שם מלא', 'צד', 'קטגוריה', 'טלפון', 'מבוגרים', 'ילדים', 'אישור הגעה', 'סבירות הגעה', 'הגיע', 'מתנה ₪', 'שולחן', 'הערות'],
+    keys: ['id', 'name', 'side', 'category', 'phone', 'adults', 'kids', 'rsvp', 'chance', 'arrived', 'gift', 'table', 'notes'],
+    types: ['s', 's', 's', 's', 's', 'n', 'n', 's', 's', 'b', 'n', 's', 's']
   },
   vendors: {
     sheet: 'ספקים',
@@ -126,14 +126,24 @@ function readSheet(ss, def) {
   if (!sh) return [];
   var last = sh.getLastRow();
   if (last < 2) return [];
-  var width = def.cols.length;
+
+  // קוראים לפי שם הכותרת ולא לפי מיקום — כך הוספת עמודה או שינוי סדר
+  // בגיליון לא מזיזה נתונים לעמודה הלא נכונה.
+  var width = Math.min(Math.max(def.cols.length, sh.getLastColumn()), sh.getMaxColumns());
+  var head = sh.getRange(1, 1, 1, width).getValues()[0].map(function (h) { return String(h).trim(); });
+  var idx = def.cols.map(function (c) { return head.indexOf(c); });
+  if (!idx.some(function (p) { return p >= 0; })) idx = def.cols.map(function (c, i) { return i; }); // אין כותרות – לפי מיקום
+
   var values = sh.getRange(2, 1, last - 1, width).getValues();
   var rows = [];
   values.forEach(function (r) {
     var empty = r.every(function (c) { return c === '' || c === null; });
     if (empty) return;
     var o = {};
-    def.keys.forEach(function (k, i) { o[k] = decodeCell(r[i], def.types[i]); });
+    def.keys.forEach(function (k, i) {
+      var p = idx[i];
+      o[k] = decodeCell(p >= 0 ? r[p] : '', def.types[i]);
+    });
     if (!o.id) o.id = uid();
     rows.push(o);
   });
@@ -200,6 +210,7 @@ function saveAll(req) {
 function writeSheet(ss, def, rows) {
   var sh = ss.getSheetByName(def.sheet) || ss.insertSheet(def.sheet);
   var width = def.cols.length;
+  if (sh.getMaxColumns() < width) sh.insertColumnsAfter(sh.getMaxColumns(), width - sh.getMaxColumns());
 
   sh.getRange(1, 1, 1, width).setValues([def.cols]);
 
@@ -299,6 +310,25 @@ function appendRow(def, obj) {
 function uid() { return Math.random().toString(36).slice(2, 9); }
 
 /**
+ * משלים עמודות שנוספו לסכמה אחרי שהגיליון כבר נוצר.
+ * מוסיף עמודה ריקה במיקום הנכון ודוחף את שאר הנתונים ימינה,
+ * כדי ששורות קיימות לא יזוזו לעמודה הלא נכונה.
+ */
+function alignColumns(sh, def) {
+  var lastCol = sh.getLastColumn();
+  if (lastCol < 1) return;
+  var head = sh.getRange(1, 1, 1, lastCol).getValues()[0].map(function (h) { return String(h).trim(); });
+  if (!head.some(function (h) { return h; })) return;   // אין שורת כותרות – אין מה ליישר
+  def.cols.forEach(function (c, i) {
+    if (head.indexOf(c) === -1) {
+      sh.insertColumnBefore(i + 1);
+      sh.getRange(1, i + 1).setValue(c);
+      head.splice(i, 0, c);
+    }
+  });
+}
+
+/**
  * מריצים פעם אחת: בונה את כל הלשוניות, הכותרות, עיצוב ונתוני התחלה.
  * הרצה חוזרת לא מוחקת נתונים קיימים – רק משלימה לשוניות חסרות.
  */
@@ -311,6 +341,7 @@ function setup() {
     var sh = ss.getSheetByName(def.sheet);
     var fresh = !sh;
     if (fresh) sh = ss.insertSheet(def.sheet);
+    if (!fresh) alignColumns(sh, def);   // גיליון ותיק – משלימים עמודות חדשות במקום הנכון
     sh.setRightToLeft(true);
     sh.getRange(1, 1, 1, def.cols.length).setValues([def.cols])
       .setFontWeight('bold').setBackground('#3E5D50').setFontColor('#F5F2ED');
@@ -403,3 +434,8 @@ var SEED = {
   ],
   files: []
 };
+
+// סבירות הגעה התחלתית נגזרת מאישור ההגעה; אפשר לשנות ידנית בכל שורה.
+SEED.guests.forEach(function (g) {
+  g.chance = g.rsvp === 'אישר' ? 'גבוהה' : g.rsvp === 'לא מגיע' ? 'נמוכה' : 'בינונית';
+});
