@@ -78,8 +78,24 @@
   .ck{width:17px;height:17px;accent-color:var(--green);cursor:pointer}
   .field{border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:14px;background:#FFF}
 
+  .multi{position:relative}
+  .multi .mbtn{display:flex;align-items:center;gap:8px;min-width:158px;cursor:pointer;user-select:none;text-align:right}
+  .multi .mbtn.on{border-color:var(--green);color:var(--green)}
+  .multi .mbtn>span:first-child{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .multi .cnt{background:var(--green);color:#FFF;border-radius:999px;font-size:11px;font-weight:700;padding:1px 7px}
+  .multi .arw{font-size:10px;color:var(--muted)}
+  .drop{position:absolute;top:calc(100% + 6px);inset-inline-start:0;z-index:70;background:#FFF;border:1px solid var(--line);
+        border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.13);padding:8px;min-width:212px;max-height:290px;overflow:auto}
+  .drop .dhead{display:flex;gap:8px;padding:2px 4px 8px;margin-bottom:6px;border-bottom:1px solid var(--line2)}
+  .drop .dhead button{flex:1;background:var(--soft);border:1px solid var(--line2);border-radius:8px;padding:5px;font-size:12px;font-weight:600;cursor:pointer}
+  .drop .dhead button:hover{border-color:var(--green);color:var(--green)}
+  .drop label{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:8px;font-size:13.5px;cursor:pointer}
+  .drop label:hover{background:var(--soft)}
+  .drop .dot{width:9px;height:9px;border-radius:50%;flex:none}
+  .drop .dn{color:var(--muted);font-size:11.5px;margin-inline-start:auto}
+
   .toolbar{padding:16px 20px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--line2)}
-  .foot{padding:14px 20px;display:flex;justify-content:space-between;align-items:center;background:var(--soft);border-top:1px solid var(--line2);gap:10px;flex-wrap:wrap}
+  .foot{padding:14px 20px;display:flex;justify-content:space-between;align-items:center;background:var(--soft);border-top:1px solid var(--line2);gap:10px;flex-wrap:wrap;border-radius:0 0 15px 15px}
 
   /* seating */
   .seatgrid{display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start}
@@ -239,7 +255,7 @@ var CFG = load(LS_CFG, {token:'', auto:true});
 var authed = !!CFG.token;          // האם המכשיר הזה כבר עבר סיסמה
 var gateMsg = '', gateBusy = false;
 var S = {
-  view:'overview', search:'', fSide:'all', fCat:'all', fRsvp:'all', limit:50,
+  view:'overview', search:'', fSide:'all', fCats:[], fCatOpen:false, fRsvp:'all', limit:50,
   bankSearch:'', newShape:'round', newSeats:'12', selectedTable:null,
   newTask:'', newTaskCat:'כללי', newTaskDue:'',
   syncOpen:false, importMsg:'', syncMsg:'', conflict:false,
@@ -249,6 +265,7 @@ var S = {
 };
 var cached = load(LS_DATA, null);
 if (cached) Object.assign(S, cached);
+if (!Array.isArray(S.fCats)) S.fCats = [];
 
 function load(k, dflt){ try{ var r = localStorage.getItem(k); return r ? JSON.parse(r) : dflt; }catch(e){ return dflt; } }
 function persist(){
@@ -663,10 +680,38 @@ function catOptions(){
   S.guests.forEach(function(g){ if(g.category) m[g.category]=1; });
   return Object.keys(m);
 }
+function gCat(g){ return g.category || 'אחר'; }
+function catPicked(c){ return S.fCats.indexOf(c) >= 0; }
+function catFilterBox(){
+  var counts = {};
+  S.guests.forEach(function(g){ var c = gCat(g); counts[c] = (counts[c]||0) + 1; });
+  var all = catOptions();
+  var n = S.fCats.length;
+  var label = n===0 ? 'כל הקטגוריות' : (n===1 ? S.fCats[0] : n+' קטגוריות');
+  return '<div class="multi">'+
+    '<div class="field mbtn'+(n?' on':'')+'" data-act="fCat.open">'+
+      '<span>'+esc(label)+'</span>'+
+      (n>1 ? '<span class="cnt">'+n+'</span>' : '')+
+      '<span class="arw">▾</span></div>'+
+    (S.fCatOpen ?
+      '<div class="drop">'+
+        '<div class="dhead">'+
+          '<button data-act="fCat.all">בחר הכל</button>'+
+          '<button data-act="fCat.none">נקה</button></div>'+
+        all.map(function(c){
+          return '<label>'+
+            '<input type="checkbox" class="ck" data-act="fCat.pick" data-c="'+esc(c)+'"'+(catPicked(c)?' checked':'')+'>'+
+            '<span class="dot" style="background:'+catColor(c)+'"></span>'+
+            '<span>'+esc(c)+'</span>'+
+            '<span class="dn">'+(counts[c]||0)+'</span></label>';
+        }).join('')+
+      '</div>' : '')+
+  '</div>';
+}
 function vGuests(){
   var q = S.search.trim();
   var list = S.guests.filter(function(g){
-    return (S.fSide==='all'||g.side===S.fSide) && (S.fCat==='all'||g.category===S.fCat) &&
+    return (S.fSide==='all'||g.side===S.fSide) && (!S.fCats.length || catPicked(gCat(g))) &&
            (S.fRsvp==='all'||g.rsvp===S.fRsvp) &&
            (!q || String(g.name||'').indexOf(q)>=0 || String(g.phone||'').indexOf(q)>=0);
   });
@@ -696,11 +741,11 @@ function vGuests(){
       '<td><button class="x" data-act="g.del" data-id="'+g.id+'">✕</button></td></tr>';
   }).join('');
 
-  return '<div class="card" style="overflow:hidden">'+
+  return '<div class="card">'+
     '<div class="toolbar">'+
       '<input class="field" style="flex:1;min-width:200px" placeholder="חיפוש שם או טלפון…" data-act="search" data-k="search" value="'+esc(S.search)+'">'+
       '<select class="field" data-act="fSide">'+opt('all',S.fSide,'כל הצדדים')+opt(SIDE_A,S.fSide,'צד '+SIDE_A)+opt(SIDE_B,S.fSide,'צד '+SIDE_B)+'</select>'+
-      '<select class="field" data-act="fCat">'+opt('all',S.fCat,'כל הקטגוריות')+catOptions().map(function(c){return opt(c,S.fCat);}).join('')+'</select>'+
+      catFilterBox()+
       '<select class="field" data-act="fRsvp">'+opt('all',S.fRsvp,'כל הסטטוסים')+opt('אישר',S.fRsvp,'אישרו')+opt('טרם',S.fRsvp,'טרם ענו')+opt('לא מגיע',S.fRsvp,'לא מגיעים')+'</select>'+
       '<button class="btn primary" data-act="g.add">+ מוזמן</button>'+
       '<button class="btn" data-act="export.guests">ייצוא אקסל</button>'+
@@ -1047,7 +1092,15 @@ var ACT = {
 
   'search': function(el){ S.search = el.value; S.limit = 50; return true; },
   'fSide': function(el){ S.fSide = el.value; return true; },
-  'fCat':  function(el){ S.fCat  = el.value; return true; },
+  'fCat.open': function(){ S.fCatOpen = !S.fCatOpen; return true; },
+  'fCat.pick': function(el){
+    var c = el.dataset.c, i = S.fCats.indexOf(c);
+    if (el.checked && i<0) S.fCats.push(c);
+    if (!el.checked && i>=0) S.fCats.splice(i,1);
+    S.limit = 50; return true;
+  },
+  'fCat.all':  function(){ S.fCats = catOptions(); S.limit = 50; return true; },
+  'fCat.none': function(){ S.fCats = []; S.limit = 50; return true; },
   'fRsvp': function(el){ S.fRsvp = el.value; return true; },
   'more':  function(){ S.limit += 50; return true; },
 
@@ -1313,19 +1366,23 @@ function importFile(input){
 function dispatch(el, evtName){
   var act = el.dataset.act;
   var fn = ACT[act];
-  if (!fn) return;
+  if (!fn) return false;
   var needsRender = fn(el, evtName);
   if (needsRender) render();
+  return !!needsRender;
 }
 var app = document.getElementById('app');
 app.addEventListener('click', function(e){
+  // לחיצה מחוץ לתפריט הקטגוריות סוגרת אותו
+  var closing = S.fCatOpen && !e.target.closest('.multi');
+  if (closing) S.fCatOpen = false;
   var el = e.target.closest('[data-act]');
-  if (!el) return;
+  if (!el){ if (closing) render(); return; }
   if (el.tagName==='INPUT' || el.tagName==='SELECT' || el.tagName==='TEXTAREA' || el.tagName==='A') return;
   // לחיצה בתוך החלון לא סוגרת אותו — רק לחיצה על הרקע עצמו
   if (el.classList.contains('backdrop') && e.target !== el) return;
   e.preventDefault();
-  dispatch(el, 'click');
+  if (!dispatch(el, 'click') && closing) render();
 });
 // הקלדה: מעדכנים מצב בלי לצייר מחדש (חוץ מחיפוש/סינון) כדי לא לקטוע הקלדה.
 app.addEventListener('input', function(e){
@@ -1341,6 +1398,7 @@ app.addEventListener('change', function(e){
   if (el.type !== 'file') render();
 });
 app.addEventListener('keydown', function(e){
+  if (e.key==='Escape' && S.fCatOpen){ S.fCatOpen = false; render(); return; }
   if (e.key!=='Enter') return;
   if (e.target.id==='gatepw'){ e.preventDefault(); tryLogin(); return; }
   if (e.target.dataset && e.target.dataset.act==='newTask'){ e.preventDefault(); dispatch(e.target,'input'); ACT['task.add'](); render(); }
