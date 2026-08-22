@@ -68,6 +68,9 @@
   table.t{width:100%;border-collapse:collapse}
   table.t th{padding:11px 12px;font-size:12px;font-weight:600;color:var(--muted);border-bottom:1px solid var(--line2);background:var(--soft);text-align:right;white-space:nowrap}
   table.t td{padding:6px 10px;border-bottom:1px solid var(--line3)}
+  table.t tr.grp td{background:var(--soft);padding:7px 12px;border-bottom:1px solid var(--line2);font-size:12.5px}
+  table.t tr.grp b{margin-inline-start:7px}
+  table.t tr.grp .muted{margin-inline-start:10px;font-size:12px}
   table.t tr:hover td{background:#FCFBF9}
   .cell{border:1px solid transparent;border-radius:7px;padding:6px 8px;font-size:13px;background:transparent;width:100%}
   .cell:hover{border-color:var(--line2)}
@@ -444,6 +447,10 @@ function render(){
   var fk = act && act.dataset ? act.dataset.k : null;
   var selS = null, selE = null;
   try{ selS = act.selectionStart; selE = act.selectionEnd; }catch(e){}
+  // שמירת מיקומי גלילה — כדי שהמסך לא יקפוץ לראש בכל שינוי
+  var sx = window.pageXOffset, sy = window.pageYOffset;
+  var dropEl = document.querySelector('.drop'), dropTop = dropEl ? dropEl.scrollTop : 0;
+  var tblEl = document.querySelector('.tblscroll'), tblLeft = tblEl ? tblEl.scrollLeft : 0;
 
   var wd = setting('תאריך החתונה') || '';
   var days = Math.ceil((new Date(wd) - new Date())/86400000);
@@ -476,10 +483,13 @@ function render(){
     (S.syncOpen ? syncModal() : '');
 
   paintStatus();
+  var nd = document.querySelector('.drop'); if (nd && dropTop) nd.scrollTop = dropTop;
+  var nt = document.querySelector('.tblscroll'); if (nt && tblLeft) nt.scrollLeft = tblLeft;
   if (fk){
     var back = document.querySelector('[data-k="'+fk.replace(/"/g,'\\"')+'"]');
     if (back){ back.focus(); try{ back.setSelectionRange(selS, selE); }catch(e){} }
   }
+  if (window.pageYOffset !== sy || window.pageXOffset !== sx) window.scrollTo(sx, sy);
 }
 function banner(){
   return '<div class="banner" style="flex-direction:column;align-items:stretch;gap:10px">' +
@@ -682,10 +692,27 @@ function catOptions(){
 }
 function gCat(g){ return g.category || 'אחר'; }
 function catPicked(c){ return S.fCats.indexOf(c) >= 0; }
-function catFilterBox(){
+/* כל הסינונים חוץ מקטגוריה — כדי שרשימת הקטגוריות תציג רק את מה שרלוונטי */
+function guestsBase(){
+  var q = S.search.trim();
+  return S.guests.filter(function(g){
+    return (S.fSide==='all'||g.side===S.fSide) &&
+           (S.fRsvp==='all'||g.rsvp===S.fRsvp) &&
+           (!q || String(g.name||'').indexOf(q)>=0 || String(g.phone||'').indexOf(q)>=0);
+  });
+}
+function catCounts(){
   var counts = {};
-  S.guests.forEach(function(g){ var c = gCat(g); counts[c] = (counts[c]||0) + 1; });
-  var all = catOptions();
+  guestsBase().forEach(function(g){ var c = gCat(g); counts[c] = (counts[c]||0) + 1; });
+  S.fCats.forEach(function(c){ if (counts[c]==null) counts[c] = 0; });   // מסומן אך ריק — שאפשר יהיה לבטל
+  return counts;
+}
+function catFilterList(){
+  var counts = catCounts();
+  return Object.keys(counts).sort(function(a,b){ return counts[b]-counts[a] || a.localeCompare(b,'he'); });
+}
+function catFilterBox(){
+  var counts = catCounts(), all = catFilterList();
   var n = S.fCats.length;
   var label = n===0 ? 'כל הקטגוריות' : (n===1 ? S.fCats[0] : n+' קטגוריות');
   return '<div class="multi">'+
@@ -709,20 +736,36 @@ function catFilterBox(){
   '</div>';
 }
 function vGuests(){
-  var q = S.search.trim();
-  var list = S.guests.filter(function(g){
-    return (S.fSide==='all'||g.side===S.fSide) && (!S.fCats.length || catPicked(gCat(g))) &&
-           (S.fRsvp==='all'||g.rsvp===S.fRsvp) &&
-           (!q || String(g.name||'').indexOf(q)>=0 || String(g.phone||'').indexOf(q)>=0);
+  var list = guestsBase().filter(function(g){ return !S.fCats.length || catPicked(gCat(g)); });
+
+  /* מיון לפי קבוצות — הקבוצה הגדולה ראשונה. שורות חדשות (בלי שם) נשארות למעלה */
+  var gSize = {}, gPeople = {};
+  list.forEach(function(g){ var c = gCat(g); gSize[c] = (gSize[c]||0)+1; gPeople[c] = (gPeople[c]||0)+people(g); });
+  var order = Object.keys(gSize).sort(function(a,b){ return gSize[b]-gSize[a] || a.localeCompare(b,'he'); });
+  var rank = {}; order.forEach(function(c,i){ rank[c] = i; });
+  list = list.slice().sort(function(a,b){
+    var ae = !String(a.name||'').trim(), be = !String(b.name||'').trim();
+    if (ae !== be) return ae ? -1 : 1;
+    return rank[gCat(a)] - rank[gCat(b)];
   });
+
   var shown = list.slice(0, S.limit);
   var rsvpStyle = function(r){ return r==='אישר'?{bg:'#EEF2EF',fg:'#3E5D50'}:r==='לא מגיע'?{bg:'#FBEDE6',fg:'#B4714E'}:{bg:'#F7F4EE',fg:'#8C857B'}; };
   var opts = catOptions().map(function(c){ return '<option value="'+esc(c)+'">'; }).join('');
 
+  var curGroup = null;
   var rows = shown.map(function(g){
     var rs = rsvpStyle(g.rsvp), tn = g.table||'';
     var lvl = levelOf(g), cs = CHANCE_STYLE[lvl];
-    return '<tr>'+
+    var head = '';
+    if (String(g.name||'').trim() && gCat(g) !== curGroup){
+      curGroup = gCat(g);
+      head = '<tr class="grp"><td colspan="13">'+
+        '<span class="dot" style="background:'+catColor(curGroup)+'"></span>'+
+        '<b>'+esc(curGroup)+'</b>'+
+        '<span class="muted">'+gSize[curGroup]+' רשומות · '+gPeople[curGroup]+' נפשות</span></td></tr>';
+    }
+    return head+'<tr>'+
       '<td><input class="cell b" style="width:150px" data-act="g.name" data-id="'+g.id+'" data-k="g'+g.id+'name" value="'+esc(g.name)+'"></td>'+
       '<td><select class="sel" data-act="g.side" data-id="'+g.id+'" style="background:'+(g.side===SIDE_A?'#EEF2EF':'#FBEDE6')+';color:'+(g.side===SIDE_A?'#3E5D50':'#B4714E')+'">'+
         opt(SIDE_A,g.side)+opt(SIDE_B,g.side)+'</select></td>'+
@@ -750,7 +793,7 @@ function vGuests(){
       '<button class="btn primary" data-act="g.add">+ מוזמן</button>'+
       '<button class="btn" data-act="export.guests">ייצוא אקסל</button>'+
     '</div>'+
-    '<div style="overflow-x:auto"><table class="t" style="min-width:1080px"><thead><tr>'+
+    '<div class="tblscroll" style="overflow-x:auto"><table class="t" style="min-width:1080px"><thead><tr>'+
       ['שם מלא','צד','קטגוריה','טלפון','מבוגרים','ילדים','אישור','סבירות','הגיע','מתנה ₪','שולחן','הערות',''].map(function(h){return '<th>'+h+'</th>';}).join('')+
     '</tr></thead><tbody>'+rows+'</tbody></table>'+
     '<datalist id="cat-list">'+opts+'</datalist></div>'+
@@ -1099,7 +1142,7 @@ var ACT = {
     if (!el.checked && i>=0) S.fCats.splice(i,1);
     S.limit = 50; return true;
   },
-  'fCat.all':  function(){ S.fCats = catOptions(); S.limit = 50; return true; },
+  'fCat.all':  function(){ S.fCats = catFilterList(); S.limit = 50; return true; },
   'fCat.none': function(){ S.fCats = []; S.limit = 50; return true; },
   'fRsvp': function(el){ S.fRsvp = el.value; return true; },
   'more':  function(){ S.limit += 50; return true; },
