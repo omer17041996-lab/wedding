@@ -167,12 +167,19 @@
   .qsumline.tot{background:#F2EFE9;border-radius:10px;font-size:15px;font-weight:700}
   .qlrow{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;border:1px solid var(--line2);border-radius:12px;padding:10px 12px;background:var(--soft)}
   .qlrow>.x{align-self:center;padding-top:16px}
+  .qhead{position:sticky;top:0;z-index:5;background:#FFF;margin:-26px -28px 16px;padding:16px 28px 12px;
+         border-bottom:1px solid var(--line2);border-radius:18px 18px 0 0;
+         display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .qnote{align-self:center;margin-top:16px;border:1px dashed #D8D0C4;background:transparent;border-radius:8px;
+         padding:5px 10px;font-size:11.5px;color:var(--muted);cursor:pointer;white-space:nowrap}
+  .qnote:hover{border-color:var(--green);color:var(--green)}
   .qlres{flex:1 1 130px;text-align:end;padding-top:17px;font-size:13px;line-height:1.35}
   .qlres i{display:block;font-style:normal;font-size:11px;color:var(--muted);unicode-bidi:plaintext}
   @media(max-width:760px){
     .qck{padding-top:2px}
     .qlres{flex:1 1 100%;text-align:start;padding-top:2px}
     .qlrow>.x{padding-top:0}
+    .qnote{margin-top:0}
   }
 
   /* modal */
@@ -209,6 +216,7 @@
   .spin{width:11px;height:11px;border:2px solid #D8D0C4;border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
 
   @media(max-width:900px){
+    .qhead{margin:-20px -18px 12px;padding:14px 18px 10px;gap:8px}
     .wrap{padding:0 14px}
     .seatgrid{grid-template-columns:1fr}
     .brand{font-size:24px}
@@ -322,7 +330,7 @@ var S = {
   bankSearch:'', newShape:'round', newSeats:'12', selectedTable:null,
   newTask:'', newTaskCat:'כללי', newTaskDue:'',
   syncOpen:false, importMsg:'', syncMsg:'', conflict:false,
-  qView:'compare', qScen:'exp', qEdit:null, qOpen:{}, qRejected:false, qNewItem:'',
+  qView:'compare', qScen:'exp', qEdit:null, qOpen:{}, qRejected:false, qNewItem:'', qNote:{}, focusK:null,
   net:'off', /* off | ok | saving | error */ netMsg:'',
   guests:[], vendors:[], venues:[], quotes:[], quoteLines:[], tasks:[], tables:[], files:[],
   settings:Object.assign({}, DEFAULT_SETTINGS), rev:0
@@ -522,6 +530,7 @@ function render(){
   var sx = window.pageXOffset, sy = window.pageYOffset;
   var dropEl = document.querySelector('.drop'), dropTop = dropEl ? dropEl.scrollTop : 0;
   var tblEl = document.querySelector('.tblscroll'), tblLeft = tblEl ? tblEl.scrollLeft : 0;
+  var modEl = document.querySelector('.modal'), modTop = modEl ? modEl.scrollTop : 0;
 
   var wd = setting('תאריך החתונה') || '';
   var days = Math.ceil((new Date(wd) - new Date())/86400000);
@@ -557,6 +566,12 @@ function render(){
   paintStatus();
   var nd = document.querySelector('.drop'); if (nd && dropTop) nd.scrollTop = dropTop;
   var nt = document.querySelector('.tblscroll'); if (nt && tblLeft) nt.scrollLeft = tblLeft;
+  var nmo = document.querySelector('.modal'); if (nmo && modTop) nmo.scrollTop = modTop;
+  if (S.focusK){                      // שדה שנוצר עכשיו (שורת עלות חדשה, הערה שנפתחה)
+    var neu = document.querySelector('[data-k="'+S.focusK.replace(/"/g,'\\"')+'"]');
+    S.focusK = null;
+    if (neu){ neu.focus(); fk = null; }
+  }
   if (fk){
     var back = document.querySelector('[data-k="'+fk.replace(/"/g,'\\"')+'"]');
     if (back){ back.focus(); try{ back.setSelectionRange(selS, selE); }catch(e){} }
@@ -1912,16 +1927,25 @@ function quoteModal(){
         '<label class="qck"><input type="checkbox" class="ck" data-act="q.l.ext" data-id="'+l.id+'"'+(l.ext?' checked':'')+'> הערכה חיצונית</label>')+
       '<div class="qlres">'+(r ? '<b>'+nis(r.gross)+'</b><i>'+esc(r.formula||'')+'</i>' : '')+'</div>'+
       '<button class="x" data-act="q.l.del" data-id="'+l.id+'">✕</button>'+
-      '<label class="qf" style="flex:1 1 100%"><span>הערה</span>'+
-        '<input data-act="q.l.note" data-id="'+l.id+'" data-k="'+k+'n" value="'+esc(l.note||'')+'"></label>'+
+      (l.note || (S.qNote||{})[l.id]
+        ? '<label class="qf" style="flex:1 1 100%"><span>הערה</span>'+
+            '<input data-act="q.l.note" data-id="'+l.id+'" data-k="'+k+'n" value="'+esc(l.note||'')+'"></label>'
+        : '<button class="qnote" data-act="q.l.noteOpen" data-id="'+l.id+'">+ הערה</button>')+
     '</div>';
   }).join('') || '<div class="muted" style="padding:10px 0">עוד אין שורות. הוסיפו שורה, או טענו תבנית מוכנה.</div>';
 
-  return '<div class="backdrop" data-act="q.close"><div class="modal" data-stop style="width:940px">'+
-    '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px">'+
-      '<div class="serif" style="font-size:22px;font-weight:700">עריכת הצעה</div>'+
+  /* הרקע בכוונה בלי data-act — טופס ארוך לא אמור להיסגר מלחיצה מקרית בצד.
+     יציאה: ✕, "סיימתי", או Escape. הכל נשמר תוך כדי, אין מה לאבד. */
+  return '<div class="backdrop"><div class="modal" data-stop style="width:1000px">'+
+    '<div class="qhead">'+
+      '<div style="flex:1;min-width:140px">'+
+        '<div class="serif" style="font-size:20px;font-weight:700;line-height:1.2">'+esc(q.name||'הצעה חדשה')+'</div>'+
+        '<div class="muted" style="font-size:11.5px">'+g+' אורחים · תרחיש '+QSCEN_HE[S.qScen]+' · נשמר אוטומטית</div>'+
+      '</div>'+
+      '<div style="text-align:end"><div class="serif" style="font-size:20px;font-weight:700">'+nis(c.total)+'</div>'+
+        '<div class="muted" style="font-size:11px">סה״כ מנורמל</div></div>'+
+      '<button class="btn sm primary" data-act="q.close">סיימתי</button>'+
       '<button class="x" style="font-size:20px" data-act="q.close">✕</button></div>'+
-    '<div class="muted" style="margin-bottom:16px">הכל נשמר לבד. הסכומים למטה מחושבים ב־'+g+' אורחים (תרחיש '+QSCEN_HE[S.qScen]+').</div>'+
 
     '<div class="box"><h4>פרטי ההצעה</h4>'+
       '<div class="qrow">'+ fld('שם ההצעה','q.name',q.name) + selFld('סוג','q.kind',q.kind,QKIND) + selFld('סטטוס','q.status',q.status,QSTATUS) +'</div>'+
@@ -2209,9 +2233,15 @@ var ACT = {
   'q.deposit': f('quotes','deposit','n'), 'q.paid': f('quotes','paid','n'),
 
   'q.l.add': function(el){
-    S.quoteLines.push({id:uid(), quoteId:el.dataset.id, cat:'אחר', desc:'', calc:'fixed',
+    var id = uid();
+    S.quoteLines.push({id:id, quoteId:el.dataset.id, cat:'אחר', desc:'', calc:'fixed',
                        amount:0, per:0, pctOf:'', vatInc:false, ext:false, note:''});
+    S.focusK = 'ql' + id + 'd';    // הסמן נוחת בשורה החדשה במקום שהמסך יקפוץ
     touch(); return true;
+  },
+  'q.l.noteOpen': function(el){
+    S.qNote = S.qNote || {}; S.qNote[el.dataset.id] = true;
+    S.focusK = 'ql' + el.dataset.id + 'n'; return true;
   },
   'q.l.del':  function(el){ del('quoteLines', el.dataset.id); return true; },
   'q.l.cat':  f('quoteLines','cat'),   'q.l.desc': f('quoteLines','desc'),
@@ -2462,6 +2492,7 @@ app.addEventListener('change', function(e){
 });
 app.addEventListener('keydown', function(e){
   if (e.key==='Escape' && S.fCatOpen){ S.fCatOpen = false; render(); return; }
+  if (e.key==='Escape' && S.qEdit){ S.qEdit = null; render(); return; }
   if (e.key!=='Enter') return;
   if (e.target.id==='gatepw'){ e.preventDefault(); tryLogin(); return; }
   if (e.target.dataset && e.target.dataset.act==='newTask'){ e.preventDefault(); dispatch(e.target,'input'); ACT['task.add'](); render(); }
