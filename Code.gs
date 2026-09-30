@@ -47,6 +47,25 @@ const SCHEMA = {
     keys: ['id', 'name', 'date', 'day', 'pricePer', 'minGuests', 'extras', 'notes', 'status'],
     types: ['s', 's', 's', 's', 'n', 'n', 's', 's', 's']
   },
+  quotes: {
+    sheet: 'הצעות מחיר',
+    cols: ['id', 'שם ההצעה', 'סוג', 'איש קשר', 'תאריך ההצעה', 'בתוקף עד', 'תאריך האירוע', 'יום / עונה',
+           'מינימום מחויב', 'שיטת מינימום', 'קנס לאורח חסר', 'קנס כולל מע״מ', 'מקדמה', 'שולם עד היום',
+           'מועדי תשלום', 'סטטוס', 'הערות'],
+    keys: ['id', 'name', 'kind', 'contact', 'quoteDate', 'validUntil', 'eventDate', 'weekday',
+           'minGuests', 'minMode', 'penaltyPer', 'penaltyVatInc', 'deposit', 'paid',
+           'payTerms', 'status', 'notes'],
+    types: ['s', 's', 's', 's', 'd', 'd', 'd', 's', 'n', 's', 'n', 'b', 'n', 'n', 's', 's', 's']
+  },
+  // שורת עלות אחת בתוך הצעה. "סוג חישוב" קובע איך השורה מגיבה למספר האורחים:
+  // fixed (קבוע) · perGuest (לפי אורח) · tier (מדרגות, יחידה לכל X) · percent (אחוז) · included (כלול).
+  quoteLines: {
+    sheet: 'שורות עלות',
+    cols: ['id', 'מזהה הצעה', 'קטגוריה', 'תיאור', 'סוג חישוב', 'סכום', 'יחידה לכל',
+           'אחוז מתוך', 'כולל מע״מ', 'הערכה חיצונית', 'הערה'],
+    keys: ['id', 'quoteId', 'cat', 'desc', 'calc', 'amount', 'per', 'pctOf', 'vatInc', 'ext', 'note'],
+    types: ['s', 's', 's', 's', 's', 'n', 'n', 's', 'b', 'b', 's']
+  },
   tasks: {
     sheet: 'משימות',
     cols: ['id', 'משימה', 'קטגוריה', 'תאריך יעד', 'בוצע'],

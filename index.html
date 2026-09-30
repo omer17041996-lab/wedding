@@ -116,6 +116,65 @@
   .adder{cursor:pointer;border:1px dashed #D8D0C4;border-radius:8px;padding:4px 9px;font-size:12px;color:var(--muted);white-space:nowrap}
   .adder:hover{border-color:var(--green);color:var(--green)}
 
+  /* הצעות מחיר */
+  .seg{display:inline-flex;background:#FFF;border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px;flex-wrap:wrap}
+  .seg button{border:none;background:transparent;border-radius:999px;padding:7px 15px;font-size:13.5px;font-weight:600;color:#5B554D;cursor:pointer;transition:.15s}
+  .seg button:hover{color:var(--green)}
+  .seg button.on{background:var(--ink);color:var(--bg)}
+  .qparams{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
+  .qf{display:block;font-size:12px;color:var(--muted)}
+  .qf>span{display:block}
+  .qf input,.qf select{width:100%;border:1px solid var(--line2);border-radius:9px;padding:8px 10px;font-size:14px;font-weight:600;background:#FFF;color:var(--ink);margin-top:3px}
+  .qf i{display:block;font-style:normal;font-size:11px;color:var(--faint);margin-top:3px;line-height:1.4}
+  .qrow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+  .qck{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:#5B554D;white-space:nowrap;padding-top:18px}
+  .qscens{display:flex;gap:6px;flex-wrap:wrap}
+  .qscen{border:1px solid var(--line);background:#FFF;border-radius:11px;padding:5px 15px;cursor:pointer;text-align:center;line-height:1.3}
+  .qscen b{display:block;font-family:'Frank Ruhl Libre',serif;font-size:17px}
+  .qscen span{font-size:11px;color:var(--muted)}
+  .qscen.on{background:var(--green);border-color:var(--green)}
+  .qscen.on b,.qscen.on span{color:#FFF}
+
+  table.qcmp td{text-align:center;vertical-align:middle}
+  table.qcmp th:first-child,table.qcmp td:first-child{text-align:right;background:var(--soft);position:sticky;inset-inline-start:0;z-index:2}
+  table.qcmp tfoot td{border-top:1px solid var(--line2);padding:9px 10px;background:#FDFCFA}
+  table.qcmp tfoot tr.qtotrow td{background:#F2EFE9;border-top:2px solid var(--line)}
+  .qtot{font-family:'Frank Ruhl Libre',serif;font-size:19px;font-weight:700;line-height:1.15}
+  .qest{background:#FBF3E6;color:#9A7B33}
+  .qinc{background:#EEF2EF;color:#3E5D50;font-size:12.5px;font-weight:600}
+  .qmiss{background:#FAF8F5;color:#C5BDB2}
+  .qbest{background:#EEF2EF}
+  .qpend{background:#FDFAF4;color:#B09A72;font-size:12px;font-weight:600}
+  .qesttx{color:#9A7B33;font-weight:600}
+  .qlegend{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+  .qlegend i{width:13px;height:13px;border-radius:4px;display:inline-block;border:1px solid rgba(0,0,0,.06)}
+  .qsplit{height:5px;background:#E1DCD3;border-radius:3px;overflow:hidden;margin:4px 0 2px}
+  .qsplit>i{display:block;height:100%;background:var(--green)}
+  .qcov{width:100%;max-width:120px;font-weight:600}
+
+  .qmetas{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:7px 18px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line3)}
+  .qmeta{font-size:12.5px}
+  .qmeta span{color:var(--muted);margin-inline-end:6px}
+  .qburn{background:#FBEDE6;border:1px solid #EFDCD2;color:#9C5638;border-radius:10px;padding:9px 12px;font-size:12.5px;line-height:1.6}
+  .qcat{margin-bottom:10px}
+  .qcath{display:flex;justify-content:space-between;gap:10px;background:var(--soft);border-radius:8px;padding:6px 10px;font-size:12.5px;font-weight:700}
+  .qline{display:flex;align-items:baseline;gap:10px;padding:7px 10px;border-bottom:1px solid var(--line3);flex-wrap:wrap}
+  .qlmain{flex:1 1 190px;font-size:13px;line-height:1.5}
+  .qlcalc{flex:1 1 180px;font-size:12px;color:var(--muted);unicode-bidi:plaintext;text-align:start}
+  .qlsum{flex:0 0 94px;text-align:end;font-size:13.5px;font-weight:700}
+  .qtag{font-size:10px;font-weight:700;border-radius:5px;padding:1px 6px;margin-inline-start:4px;white-space:nowrap}
+  .qsumline{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:7px 10px;font-size:13px}
+  .qsumline.tot{background:#F2EFE9;border-radius:10px;font-size:15px;font-weight:700}
+  .qlrow{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;border:1px solid var(--line2);border-radius:12px;padding:10px 12px;background:var(--soft)}
+  .qlrow>.x{align-self:center;padding-top:16px}
+  .qlres{flex:1 1 130px;text-align:end;padding-top:17px;font-size:13px;line-height:1.35}
+  .qlres i{display:block;font-style:normal;font-size:11px;color:var(--muted);unicode-bidi:plaintext}
+  @media(max-width:760px){
+    .qck{padding-top:2px}
+    .qlres{flex:1 1 100%;text-align:start;padding-top:2px}
+    .qlrow>.x{padding-top:0}
+  }
+
   /* modal */
   .backdrop{position:fixed;inset:0;background:rgba(35,32,28,.42);z-index:80;display:flex;align-items:center;justify-content:center;padding:24px}
   .modal{background:#FFF;border-radius:18px;width:600px;max-width:100%;max-height:88vh;overflow-y:auto;padding:26px 28px;animation:fadeUp .18s ease}
@@ -183,7 +242,8 @@ var nis = function(n){ return '₪' + Math.round(n||0).toLocaleString('he-IL'); 
 var esc = function(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); };
 var catColor = function(c){ return CAT_COLORS[c] || CAT_COLORS['אחר']; };
 var people = function(g){ return (+g.adults||0) + (+g.kids||0); };
-var DEFAULT_SETTINGS = {'תאריך החתונה':'2026-12-17', 'תקציב מתוכנן':160000};
+var DEFAULT_SETTINGS = {'תאריך החתונה':'2026-12-17', 'תקציב מתוכנן':160000,
+                        'שיעור מע״מ':18, 'אחוז הגעה צפוי':75};
 
 /* סבירות הגעה — שלוש רמות, וכל אחת שווה אחוז לצורך חישוב הצפי */
 var CHANCE_LEVELS = ['גבוהה','בינונית','נמוכה'];
@@ -262,26 +322,31 @@ var S = {
   bankSearch:'', newShape:'round', newSeats:'12', selectedTable:null,
   newTask:'', newTaskCat:'כללי', newTaskDue:'',
   syncOpen:false, importMsg:'', syncMsg:'', conflict:false,
+  qView:'compare', qScen:'exp', qEdit:null, qOpen:{}, qRejected:false, qNewItem:'',
   net:'off', /* off | ok | saving | error */ netMsg:'',
-  guests:[], vendors:[], venues:[], tasks:[], tables:[], files:[],
+  guests:[], vendors:[], venues:[], quotes:[], quoteLines:[], tasks:[], tables:[], files:[],
   settings:Object.assign({}, DEFAULT_SETTINGS), rev:0
 };
 var cached = load(LS_DATA, null);
 if (cached) Object.assign(S, cached);
 if (!Array.isArray(S.fCats)) S.fCats = [];
+if (!Array.isArray(S.quotes)) S.quotes = [];
+if (!Array.isArray(S.quoteLines)) S.quoteLines = [];
 
 function load(k, dflt){ try{ var r = localStorage.getItem(k); return r ? JSON.parse(r) : dflt; }catch(e){ return dflt; } }
 function persist(){
   try{
     localStorage.setItem(LS_DATA, JSON.stringify({
-      guests:S.guests, vendors:S.vendors, venues:S.venues, tasks:S.tasks,
+      guests:S.guests, vendors:S.vendors, venues:S.venues, quotes:S.quotes,
+      quoteLines:S.quoteLines, tasks:S.tasks,
       tables:S.tables, files:S.files, settings:S.settings, rev:S.rev
     }));
     localStorage.setItem(LS_CFG, JSON.stringify(CFG));
   }catch(e){}
 }
 function snapshot(){
-  return {guests:S.guests, vendors:S.vendors, venues:S.venues, tasks:S.tasks, tables:S.tables, files:S.files, settings:S.settings};
+  return {guests:S.guests, vendors:S.vendors, venues:S.venues, quotes:S.quotes, quoteLines:S.quoteLines,
+          tasks:S.tasks, tables:S.tables, files:S.files, settings:S.settings};
 }
 
 /* ─────────────── שרת ─────────────── */
@@ -337,6 +402,12 @@ function pull(){
     S.guests  = (d.guests||[]).map(function(g){ g.arrived=!!g.arrived; g.phone=fixPhone(g.phone); return g; });
     S.vendors = (d.vendors||[]).map(function(x){ x.contact = fixPhone(x.contact); return x; });
     S.venues = d.venues||[]; S.files = d.files||[];
+    // אוסף שהשרת עוד לא מכיר (Code.gs שלא פורסם מחדש) — משאירים את מה שיש
+    // כאן במקום למחוק אותו, אחרת רענון אחד מוחק את כל ההצעות.
+    if ('quotes' in d) S.quotes = (d.quotes||[]).map(function(q){
+      q.penaltyVatInc = !!q.penaltyVatInc; q.contact = fixPhone(q.contact); return q; });
+    if ('quoteLines' in d) S.quoteLines = (d.quoteLines||[]).map(function(l){
+      l.vatInc = !!l.vatInc; l.ext = !!l.ext; return l; });
     S.tasks   = (d.tasks||[]).map(function(t){ t.done=!!t.done; return t; });
     S.tables  = (d.tables||[]).map(function(t){ t.shape = SHAPES[t.shape] || t.shape || 'round'; return t; });
     // מיזוג ולא החלפה: אם חסרה שורה בלשונית "הגדרות" נשארת ברירת המחדל,
@@ -399,7 +470,7 @@ function stats(){
 
 /* ═══════════════════ תצוגה ═══════════════════ */
 var VIEWS = [['overview','סקירה'],['guests','מוזמנים'],['seating','סידור שולחנות'],['vendors','ספקים'],
-             ['venues','מקומות'],['tasks','משימות'],['budget','תקציב'],['gifts','מתנות']];
+             ['venues','מקומות'],['quotes','הצעות מחיר'],['tasks','משימות'],['budget','תקציב'],['gifts','מתנות']];
 
 /* ─────────────── מסך כניסה ─────────────── */
 function renderGate(){
@@ -480,7 +551,8 @@ function render(){
       (S.conflict ? banner() : '') +
       '<div style="margin-top:'+(S.conflict?'16px':'0')+'">' + viewHtml() + '</div>' +
     '</div>' +
-    (S.syncOpen ? syncModal() : '');
+    (S.syncOpen ? syncModal() : '') +
+    (S.qEdit ? quoteModal() : '');
 
   paintStatus();
   var nd = document.querySelector('.drop'); if (nd && dropTop) nd.scrollTop = dropTop;
@@ -520,6 +592,7 @@ function viewHtml(){
     case 'seating':  return vSeating();
     case 'vendors':  return vVendors();
     case 'venues':   return vVenues();
+    case 'quotes':   return vQuotes();
     case 'tasks':    return vTasks();
     case 'budget':   return vBudget();
     case 'gifts':    return vGifts();
@@ -1071,6 +1144,843 @@ function vGifts(){
       '</tr></thead><tbody>'+rows+'</tbody></table></div></div></div>';
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   השוואת הצעות מחיר
+   ───────────────────────────────────────────────────────────────────
+   כל מקום מתמחר אחרת: גן נותן מחיר למנה עם מינימום, שטח נותן עשרות
+   שורות קבועות. כדי להשוות באמת צריך שלושה דברים —
+   1. להביא את כולם לאותו מספר אורחים (תרחיש),
+   2. להביא את כולם לאותו בסיס מע״מ,
+   3. להשלים בהערכה את מה שהצעה אחת כוללת והשנייה לא (נרמול).
+   הלוגיקה כאן היא פונקציות טהורות. ה-UI רק מצייר את מה שהן מחזירות.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* הפריטים המשותפים — אותה רשימה משמשת גם כקטגוריה של שורת עלות
+   וגם כשורה בטבלת הנרמול, כך שאין שני מקורות אמת שצריך לסנכרן. */
+var QITEMS = ['אוכל','בר ואלכוהול','מלצרים וצוות','DJ והגברה','תאורה','חופה ועיצוב',
+  'ריהוט - שולחנות וכיסאות','מפות וכלים','אוהל והצללה','גנרטור וחשמל','שירותים','מטבח שדה',
+  'חניה ושאטלים','אבטחה','ניקיון','ביטוח','רישוי ואישורים','צלם סטילס','וידאו','מגנטים',
+  'הפקה וניהול אירוע','הובלות ולוגיסטיקה','שכירות המקום','אחר'];
+
+var QCALC    = [['fixed','קבוע'],['perGuest','לפי אורח'],['tier','מדרגות'],['percent','אחוז'],['included','כלול']];
+var QCALC_HE = {fixed:'קבוע', perGuest:'לפי אורח', tier:'מדרגות', percent:'אחוז', included:'כלול'};
+var QSTATUS  = ['בבדיקה','מועדף','נפסל'];
+var QKIND    = ['גן/אולם','שטח','אחר'];
+var QSCEN    = [['pess','פסימי'],['exp','צפוי'],['opt','אופטימי']];
+var QSCEN_HE = {pess:'פסימי', exp:'צפוי', opt:'אופטימי'};
+
+var QSTAT_STYLE = {'מועדף':{bg:'#EEF2EF',fg:'#3E5D50'}, 'נפסל':{bg:'#FBEDE6',fg:'#B4714E'}, 'בבדיקה':{bg:'#F7F4EE',fg:'#8C857B'}};
+/* צבע לכל הצעה בגרף ובכותרות — לפי סדר ההצעות */
+var QCOLORS = ['#3E5D50','#B4714E','#6B7A8F','#9A7B33','#7D6B8F','#5A7A6A','#A0574B','#4C6B7A'];
+
+/* תבניות: השורות הנפוצות עם סכומים ריקים, כדי שלא מתחילים מדף לבן.
+   [קטגוריה, תיאור, סוג חישוב, מדרגה] */
+var QTPL = {
+  'גן/אולם': {minGuests:300, minMode:'max', lines:[
+    ['אוכל','מנה לאורח (כולל מלצרות ושתייה קלה)','perGuest',0],
+    ['בר ואלכוהול','בר לראש','perGuest',0],
+    ['שכירות המקום','דמי שכירות / הפקה','fixed',0],
+    ['DJ והגברה','הגברה של המקום','included',0],
+    ['תאורה','תאורת אווירה','fixed',0],
+    ['חופה ועיצוב','עיצוב חופה ושולחנות','fixed',0],
+    ['ריהוט - שולחנות וכיסאות','כלול במקום','included',0],
+    ['מפות וכלים','כלול במקום','included',0],
+    ['שירותים','שירותים קבועים במקום','included',0],
+    ['חניה ושאטלים','חניה במקום','included',0],
+    ['ניקיון','כלול במקום','included',0],
+    ['אבטחה','מאבטח לפי דרישת המשטרה','fixed',0],
+    ['מלצרים וצוות','טיפ לצוות','percent',0]
+  ]},
+  'שטח': {minGuests:0, minMode:'max', lines:[
+    ['שכירות המקום','שכירות השטח ליום האירוע','fixed',0],
+    ['אוכל','קייטרינג - מנה לאורח','perGuest',0],
+    ['מטבח שדה','מטבח שדה, ציוד בישול וקירור','fixed',0],
+    ['בר ואלכוהול','בר לראש','perGuest',0],
+    ['מלצרים וצוות','מלצר לכל 15 אורחים','tier',15],
+    ['ריהוט - שולחנות וכיסאות','שולחן + כיסאות לכל 12 אורחים','tier',12],
+    ['מפות וכלים','מפות, כלים וסכו״ם','perGuest',0],
+    ['אוהל והצללה','אוהל / הצללה','fixed',0],
+    ['גנרטור וחשמל','גנרטור, חיווט ולוחות','fixed',0],
+    ['תאורה','תאורת שטח ואווירה','fixed',0],
+    ['DJ והגברה','הגברה מלאה לשטח פתוח','fixed',0],
+    ['שירותים','תא שירותים לכל 100 אורחים','tier',100],
+    ['חופה ועיצוב','חופה, עיצוב ופרחים','fixed',0],
+    ['חניה ושאטלים','שאטלים וסדרן חניה','fixed',0],
+    ['אבטחה','אבטחה ומאבטח','fixed',0],
+    ['ניקיון','ניקיון לפני ואחרי','fixed',0],
+    ['ביטוח','ביטוח אירוע','fixed',0],
+    ['רישוי ואישורים','רישוי, כיבוי אש ואישור התכנסות','fixed',0],
+    ['הובלות ולוגיסטיקה','הובלות, פריקה והרכבה','fixed',0],
+    ['הפקה וניהול אירוע','מפיק / מנהל אירוע','fixed',0]
+  ]}
+};
+
+/* ─────────── פונקציות טהורות ─────────── */
+
+function qNum(v, dflt){ var n = parseFloat(v); return isFinite(n) ? n : (dflt||0); }
+
+/* מספרי האורחים בשלושת התרחישים.
+   over = דריסות ידניות; ערך ריק או 0 משמעו "חשב לי". */
+function scenarioGuests(invited, attendPct, over){
+  over = over || {};
+  var inv  = Math.round(qNum(invited,0));
+  var base = Math.round(inv * qNum(attendPct,0) / 100);
+  var pick = function(k, dflt){ var v = qNum(over[k],0); return v > 0 ? Math.round(v) : dflt; };
+  return {
+    invited: inv,
+    pct:     qNum(attendPct,0),
+    base:    base,
+    pess:    pick('pess', Math.round(base * 0.85)),
+    exp:     pick('exp',  base),
+    opt:     pick('opt',  Math.min(inv, Math.round(base * 1.12)))
+  };
+}
+
+/* מצב הכיסוי של פריט בהצעה — נגזר מהשורות, לא נשמר בנפרד. */
+function itemState(lines, item){
+  var mine = (lines||[]).filter(function(l){ return l.cat === item; });
+  if (!mine.length) return 'none';                                    // לא טופל
+  if (mine.some(function(l){ return l.ext; })) return 'missing';      // לא מכוסה → הערכה חיצונית
+  if (mine.every(function(l){ return l.calc === 'included'; })) return 'included';
+  return 'extra';                                                     // בתוספת תשלום
+}
+var QSTATE_HE = {none:'לא טופל', included:'כלול', extra:'בתוספת', missing:'לא מכוסה'};
+
+/* הלב: עלות ההצעה במספר אורחים נתון.
+   הכל מחושב בנטו (לפני מע״מ) ורק בסוף מוסיפים מע״מ, כך שלא משנה
+   אם ספק אחד נקב מחיר כולל מע״מ והשני לא. */
+function computeQuote(q, allLines, guests, vatPct){
+  q = q || {};
+  var v     = 1 + qNum(vatPct,0)/100;
+  var lines = (allLines||[]).filter(function(l){ return l.quoteId === q.id; });
+  var minG  = Math.round(qNum(q.minGuests,0));
+  var mode  = q.minMode === 'penalty' ? 'penalty' : 'max';
+  guests    = Math.max(0, Math.round(qNum(guests,0)));
+  /* מינימום מחויב בשיטת max: המנות מחויבות לפי הגבוה מבין השניים.
+     שורות מדרגה (מלצרים, שירותים) נספרות לפי האורחים שבאמת מגיעים. */
+  var billed = mode === 'max' ? Math.max(guests, minG) : guests;
+
+  var rows = lines.map(function(l){
+    var raw  = qNum(l.amount,0);
+    var unit = l.calc === 'percent' ? raw : (l.vatInc ? raw / v : raw);
+    var qty = 0, net = 0, formula = '';
+    if (l.calc === 'included'){
+      formula = 'כלול במחיר ההצעה';
+    } else if (l.calc === 'perGuest'){
+      qty = billed; net = unit * billed;
+      formula = billed + ' אורחים × ' + nis(unit) + (billed > guests ? ' — לפי המינימום' : '');
+    } else if (l.calc === 'tier'){
+      var per = Math.max(1, Math.round(qNum(l.per,1)));
+      qty = Math.ceil(guests / per); net = unit * qty;
+      formula = 'ceil(' + guests + '/' + per + ') = ' + qty + ' × ' + nis(unit);
+    } else if (l.calc === 'percent'){
+      qty = 1;                                     // מחושב במעבר השני
+    } else {
+      qty = 1; net = unit; formula = 'סכום קבוע';
+    }
+    return {line:l, cat:l.cat||'אחר', qty:qty, unitNet:(l.calc==='percent'?0:unit), net:net, formula:formula,
+            ext:!!l.ext, blank: l.calc !== 'included' && qNum(l.amount,0) === 0};
+  });
+
+  /* מעבר שני — שורות אחוז. הבסיס הוא סכום השורות שאינן אחוז ואינן
+     הערכה חיצונית (לא משלמים טיפ על משהו שקנינו בחוץ), ואפשר להגביל
+     לקטגוריה אחת (למשל טיפ רק על האוכל). */
+  rows.forEach(function(r){
+    if (r.line.calc !== 'percent') return;
+    var only = r.line.pctOf || '';
+    var base = rows.reduce(function(a, o){
+      if (o.line.calc === 'percent' || o.ext) return a;
+      if (only && o.cat !== only) return a;
+      return a + o.net;
+    }, 0);
+    var raw = base * qNum(r.line.amount,0) / 100;
+    r.net = r.line.vatInc ? raw / v : raw;
+    r.unitNet = r.net;
+    r.formula = qNum(r.line.amount,0) + '% מתוך ' + nis(base) + (only ? ' · ' + only : ' (כל השורות)');
+  });
+
+  /* מינימום מחויב — כמה כסף נשרף על אורחים שלא הגיעו */
+  var burnGuests = 0, burnCost = 0;
+  if (mode === 'max'){
+    burnGuests = Math.max(0, billed - guests);
+    var perHead = rows.reduce(function(a,r){ return a + (r.line.calc==='perGuest' ? r.unitNet : 0); }, 0);
+    burnCost = burnGuests * perHead * v;
+  } else if (minG > guests){
+    burnGuests = minG - guests;
+    var pen = qNum(q.penaltyPer,0) / (q.penaltyVatInc ? v : 1);
+    burnCost = burnGuests * pen * v;
+    if (pen > 0) rows.push({
+      line:{id:'__pen__'+q.id, quoteId:q.id, cat:'מינימום מובטח', desc:'קנס על אורחים חסרים', calc:'fixed', synth:true},
+      cat:'מינימום מובטח', qty:burnGuests, unitNet:pen, net:burnGuests*pen, ext:false,
+      formula:'(' + minG + ' − ' + guests + ') = ' + burnGuests + ' × ' + nis(pen)
+    });
+  }
+
+  rows.forEach(function(r){ r.gross = r.net * v; });
+
+  var sum = function(pred){ return rows.reduce(function(a,r){ return pred(r) ? a + r.gross : a; }, 0); };
+  var quoted    = sum(function(r){ return !r.ext; });
+  var estimated = sum(function(r){ return  r.ext; });
+  var isFixed   = function(r){ return r.line.calc === 'fixed'; };
+  var total     = quoted + estimated;
+
+  var byCat = {};
+  rows.forEach(function(r){
+    var c = byCat[r.cat] || (byCat[r.cat] = {gross:0, ext:0, included:false, blank:true, rows:[]});
+    c.gross += r.gross; if (r.ext) c.ext += r.gross;
+    if (r.line.calc === 'included') c.included = true;
+    if (!r.blank) c.blank = false;
+    c.rows.push(r);
+  });
+
+  return {
+    quote:q, rows:rows, byCat:byCat, vat:qNum(vatPct,0),
+    guests:guests, billed:billed, minGuests:minG, minMode:mode,
+    burnGuests:burnGuests, burnCost:burnCost,
+    quoted:quoted, estimated:estimated, total:total,
+    fixed: sum(isFixed), variable: sum(function(r){ return !isFixed(r); }),
+    perGuest: guests ? total / guests : 0
+  };
+}
+
+/* ─────────── בדיקות לנוסחאות ─────────── */
+/* אין כאן שרת בנייה, ולכן הבדיקות חיות באותו קובץ ורצות בדפדפן
+   מהכפתור "בדיקות" בפס הפרמטרים — על אותן פונקציות שה-UI קורא להן. */
+function runQuoteTests(){
+  var T = [], near = function(a,b){ return Math.abs(a-b) < 0.01; };
+  var chk = function(name, got, want){ T.push({name:name, ok:near(got,want), got:Math.round(got*100)/100, want:want}); };
+  var eq  = function(name, got, want){ T.push({name:name, ok:got===want, got:got, want:want}); };
+  var Q = function(o){ return Object.assign({id:'q', minGuests:0, minMode:'max'}, o||{}); };
+  var L = function(o){ return Object.assign({id:'l'+T.length+Math.random(), quoteId:'q', cat:'אחר', calc:'fixed', amount:0, vatInc:false, ext:false}, o); };
+
+  /* בסיס — בלי מע״מ, כדי לבודד את הנוסחה עצמה */
+  chk('קבוע', computeQuote(Q(), [L({calc:'fixed', amount:5000})], 300, 0).total, 5000);
+  chk('לפי אורח: 300 × 450', computeQuote(Q(), [L({calc:'perGuest', amount:450})], 300, 0).total, 135000);
+
+  /* מדרגות */
+  chk('מדרגות: ceil(480/15) × 450', computeQuote(Q(), [L({calc:'tier', per:15, amount:450})], 480, 0).total, 32*450);
+  eq('מדרגות מתעגלות למעלה (201/100 → 3)', computeQuote(Q(), [L({calc:'tier', per:100, amount:900})], 201, 0).rows[0].qty, 3);
+  eq('מדרגות: בדיוק על הגבול (200/100 → 2)', computeQuote(Q(), [L({calc:'tier', per:100, amount:900})], 200, 0).rows[0].qty, 2);
+
+  /* אחוזים */
+  chk('אחוז: 10% מ-10,000', computeQuote(Q(), [L({calc:'fixed', amount:10000}), L({calc:'percent', amount:10})], 100, 0).total, 11000);
+  chk('אחוז מוגבל לקטגוריה', computeQuote(Q(), [L({cat:'אוכל', calc:'fixed', amount:10000}), L({cat:'תאורה', calc:'fixed', amount:5000}),
+        L({cat:'מלצרים וצוות', calc:'percent', amount:10, pctOf:'אוכל'})], 100, 0).total, 16000);
+  chk('אחוז לא חל על הערכה חיצונית', computeQuote(Q(), [L({calc:'fixed', amount:1000}),
+        L({calc:'fixed', amount:9000, ext:true}), L({calc:'percent', amount:10})], 100, 0).total, 10100);
+
+  /* מע״מ */
+  chk('מע״מ 18% נוסף על מחיר נטו', computeQuote(Q(), [L({calc:'fixed', amount:1000})], 100, 18).total, 1180);
+  chk('מחיר שכבר כולל מע״מ לא מנופח שוב', computeQuote(Q(), [L({calc:'fixed', amount:1180, vatInc:true})], 100, 18).total, 1180);
+  chk('ערבוב: אחד עם ואחד בלי', computeQuote(Q(), [L({calc:'fixed', amount:1000}), L({calc:'fixed', amount:1180, vatInc:true})], 100, 18).total, 2360);
+
+  /* כלול ונרמול */
+  chk('"כלול" לא מוסיף עלות', computeQuote(Q(), [L({cat:'שירותים', calc:'included'})], 300, 18).total, 0);
+  eq('"כלול" נספר ככיסוי', itemState([{cat:'שירותים', calc:'included'}], 'שירותים'), 'included');
+  eq('פריט בלי שורה = לא טופל', itemState([], 'ביטוח'), 'none');
+  eq('שורת הערכה = לא מכוסה', itemState([{cat:'ביטוח', calc:'fixed', ext:true}], 'ביטוח'), 'missing');
+  eq('שורה בתשלום = בתוספת', itemState([{cat:'תאורה', calc:'fixed'}], 'תאורה'), 'extra');
+  var nm = computeQuote(Q(), [L({cat:'אוכל', calc:'fixed', amount:100000}), L({cat:'ביטוח', calc:'fixed', amount:2500, ext:true})], 300, 0);
+  chk('מנורמל = הצעה + הערכות', nm.total, 102500);
+  chk('"מחיר לפי ההצעה" בלי ההערכות', nm.quoted, 100000);
+  chk('חלק ההערכות', nm.estimated, 2500);
+
+  /* מינימום — שיטת max */
+  var mx = computeQuote(Q({minGuests:300, minMode:'max'}), [L({calc:'perGuest', amount:400})], 260, 0);
+  chk('max: מחויבים 300 ולא 260', mx.total, 120000);
+  eq('max: 40 אורחים נשרפים', mx.burnGuests, 40);
+  chk('max: ₪16,000 נשרפו', mx.burnCost, 16000);
+  chk('max: מעל המינימום משלמים בפועל',
+      computeQuote(Q({minGuests:300, minMode:'max'}), [L({calc:'perGuest', amount:400})], 340, 0).total, 136000);
+  eq('max: מעל המינימום שום דבר לא נשרף',
+      computeQuote(Q({minGuests:300, minMode:'max'}), [L({calc:'perGuest', amount:400})], 340, 0).burnGuests, 0);
+  eq('מדרגות לפי אורחים בפועל ולא לפי המינימום',
+      computeQuote(Q({minGuests:300, minMode:'max'}), [L({calc:'tier', per:15, amount:450})], 150, 0).rows[0].qty, 10);
+
+  /* מינימום — שיטת קנס */
+  var pn = computeQuote(Q({minGuests:300, minMode:'penalty', penaltyPer:150}), [L({calc:'perGuest', amount:400})], 260, 0);
+  chk('קנס: 260×400 + 40×150', pn.total, 260*400 + 40*150);
+  chk('קנס: סכום שנשרף', pn.burnCost, 6000);
+  chk('קנס: מעל המינימום אין קנס',
+      computeQuote(Q({minGuests:300, minMode:'penalty', penaltyPer:150}), [L({calc:'perGuest', amount:400})], 320, 0).burnCost, 0);
+
+  /* קבוע מול משתנה ועלות לאורח */
+  var fv = computeQuote(Q(), [L({calc:'fixed', amount:20000}), L({calc:'perGuest', amount:100})], 300, 0);
+  chk('חלק קבוע', fv.fixed, 20000);
+  chk('חלק משתנה', fv.variable, 30000);
+  chk('עלות לאורח', fv.perGuest, 50000/300);
+
+  /* תרחישים */
+  eq('צפוי = 600 × 75%', scenarioGuests(600, 75, {}).exp, 450);
+  eq('פסימי = 85% מהצפוי', scenarioGuests(600, 75, {}).pess, 383);
+  eq('אופטימי לא עובר את מספר המוזמנים', scenarioGuests(400, 98, {}).opt, 400);
+  eq('דריסה ידנית גוברת', scenarioGuests(600, 75, {exp:500}).exp, 500);
+
+  return T;
+}
+
+/* ─────────── גישה לנתונים ולפרמטרים הגלובליים ─────────── */
+
+function qVat(){ var v = setting('שיעור מע״מ'); return v === '' || v == null ? 18 : qNum(v, 18); }
+function qScenSet(){
+  var invited = qNum(setting('מוזמנים להשוואה'), 0) || stats().totalPeople;
+  return scenarioGuests(invited, qNum(setting('אחוז הגעה צפוי'), 75), {
+    pess: setting('תרחיש פסימי'), exp: setting('תרחיש צפוי'), opt: setting('תרחיש אופטימי')
+  });
+}
+function qGuests(){ var s = qScenSet(); return s[S.qScen] || s.exp; }
+function qLines(id){ return (S.quoteLines||[]).filter(function(l){ return l.quoteId === id; }); }
+function qCalc(q, guests){ return computeQuote(q, S.quoteLines, guests == null ? qGuests() : guests, qVat()); }
+function qColor(i){ return QCOLORS[i % QCOLORS.length]; }
+function qList(){   // ההצעות להשוואה — נפסלות מוסתרות אלא אם ביקשו אחרת
+  return (S.quotes||[]).filter(function(q){ return S.qRejected || q.status !== 'נפסל'; });
+}
+function qExtraItems(){
+  return String(setting('פריטים נוספים')||'').split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+}
+/* רשימת הפריטים להשוואה: הרשימה הקבועה + מה שהוספנו + כל קטגוריה שכבר בשימוש */
+function qItemList(){
+  var seen = {}, out = [];
+  var push = function(c){ if (c && !seen[c]){ seen[c] = 1; out.push(c); } };
+  QITEMS.forEach(push); qExtraItems().forEach(push);
+  (S.quoteLines||[]).forEach(function(l){ push(l.cat); });
+  return out;
+}
+/* רק הפריטים שמישהו כבר נגע בהם — לטבלת ההשוואה, שלא תתפוצץ בשורות ריקות */
+function qUsedItems(){
+  var used = {};
+  (S.quoteLines||[]).forEach(function(l){ used[l.cat||'אחר'] = 1; });
+  (S.quotes||[]).forEach(function(q){ if (q.minMode === 'penalty' && qNum(q.penaltyPer,0) > 0) used['מינימום מובטח'] = 1; });
+  return qItemList().concat(['מינימום מובטח']).filter(function(c){ return used[c]; });
+}
+
+/* ─────────── התצוגה הראשית ─────────── */
+var QVIEWS = [['compare','טבלת השוואה'],['norm','נרמול וכיסוי'],['sens','גרף רגישות'],
+              ['scen','תרחישים'],['detail','פירוט הצעות'],['tests','בדיקות']];
+
+function vQuotes(){
+  var body = S.quotes.length || S.qView === 'tests' ? {
+    compare: qvCompare, norm: qvNorm, sens: qvSens, scen: qvScen, detail: qvDetail, tests: qvTests
+  }[S.qView || 'compare']() : qvEmpty();
+  return '<div class="grid">' + qParams() +
+    '<div class="seg" style="align-self:flex-start">' + QVIEWS.map(function(v){
+      return '<button data-act="q.view" data-v="'+v[0]+'"'+(S.qView===v[0]?' class="on"':'')+'>'+v[1]+'</button>';
+    }).join('') + '</div>' + body + '</div>';
+}
+
+function qvEmpty(){
+  return '<div class="card" style="padding:40px 26px;text-align:center">'+
+    '<div class="serif" style="font-size:22px;font-weight:700;margin-bottom:8px">עוד אין הצעות להשוות</div>'+
+    '<div class="muted" style="max-width:520px;margin:0 auto 20px;line-height:1.8">'+
+      'התחילו מתבנית — היא כבר מביאה את השורות הנפוצות עם סכומים ריקים, '+
+      'ואתם רק ממלאים את המספרים מההצעה שקיבלתם.</div>'+
+    '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">'+
+      '<button class="btn primary" data-act="q.add" data-tpl="גן/אולם">+ הצעה מתבנית גן/אולם</button>'+
+      '<button class="btn primary" data-act="q.add" data-tpl="שטח">+ הצעה מתבנית שטח</button>'+
+      '<button class="btn" data-act="q.add" data-tpl="">+ הצעה ריקה</button></div></div>';
+}
+
+/* ─────────── פס הפרמטרים הגלובליים ─────────── */
+function qParams(){
+  var s = qScenSet(), k = stats(), vat = qVat();
+  var fld = function(label, act, val, sub, ph){
+    return '<label class="qf"><span>'+label+'</span>'+
+      '<input type="number" data-act="'+act+'" data-k="'+act+'" value="'+(val===''||val==null?'':val)+'"'+
+        (ph ? ' placeholder="'+esc(ph)+'"' : '')+'>'+
+      (sub ? '<i>'+esc(sub)+'</i>' : '')+'</label>';
+  };
+  var scen = QSCEN.map(function(x){
+    var on = S.qScen === x[0];
+    return '<button class="qscen'+(on?' on':'')+'" data-act="q.scen" data-v="'+x[0]+'">'+
+      '<b>'+s[x[0]].toLocaleString('he-IL')+'</b><span>'+x[1]+'</span></button>';
+  }).join('');
+
+  return '<div class="card" style="padding:16px 18px">'+
+    '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px">'+
+      '<div style="font-size:15px;font-weight:700">פרמטרים להשוואה</div>'+
+      '<div class="muted">כל שינוי כאן מעדכן מיד את כל ההצעות. כל הסכומים בלוח מוצגים <b>כולל מע״מ</b>.</div>'+
+      '<span style="flex:1"></span>'+
+      '<button class="btn sm" data-act="q.add" data-tpl="גן/אולם">+ גן/אולם</button>'+
+      '<button class="btn sm" data-act="q.add" data-tpl="שטח">+ שטח</button>'+
+      '<button class="btn sm" data-act="q.add" data-tpl="">+ ריקה</button>'+
+    '</div>'+
+    '<div class="qparams">'+
+      fld('מוזמנים', 'q.invited', setting('מוזמנים להשוואה')||'', 'ברשימה: '+k.totalPeople, String(k.totalPeople))+
+      fld('% הגעה צפוי', 'q.attend', setting('אחוז הגעה צפוי')===''?'':qNum(setting('אחוז הגעה צפוי'),75), 'צפי משוקלל: '+k.expected)+
+      fld('מע״מ %', 'q.vat', vat, 'חל על שורות שסומנו "לפני מע״מ"')+
+      fld('פסימי', 'q.pess', setting('תרחיש פסימי')||'', 'ריק = אוטומטי', String(s.pess))+
+      fld('צפוי', 'q.exp', setting('תרחיש צפוי')||'', 'ריק = '+s.base, String(s.base))+
+      fld('אופטימי', 'q.opt', setting('תרחיש אופטימי')||'', 'ריק = אוטומטי', String(s.opt))+
+    '</div>'+
+    '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid var(--line3)">'+
+      '<span class="muted">התרחיש שמוצג:</span><div class="qscens">'+scen+'</div>'+
+      '<button class="btn sm" data-act="q.sync" title="לוקח את מספר המוזמנים מרשימת המוזמנים ומאפס דריסות ידניות">רענן מרשימת המוזמנים</button>'+
+      '<span style="flex:1"></span>'+
+      '<label style="display:flex;align-items:center;gap:6px;font-size:13px">'+
+        '<input type="checkbox" class="ck" data-act="q.rejected"'+(S.qRejected?' checked':'')+'> הצג גם נפסלות</label>'+
+    '</div></div>';
+}
+
+/* ─────────── 1. טבלת השוואה ─────────── */
+function qvCompare(){
+  var list = qList();
+  if (!list.length) return qvEmpty();
+  var g = qGuests(), items = qUsedItems();
+  var C = list.map(function(q){ return qCalc(q, g); });
+  var cheapest = Math.min.apply(null, C.map(function(c){ return c.total; }));
+
+  var head = '<tr><th style="min-width:150px">קטגוריה</th>' + list.map(function(q,i){
+    var st = QSTAT_STYLE[q.status] || QSTAT_STYLE['בבדיקה'];
+    return '<th style="min-width:150px;border-top:3px solid '+qColor(i)+'">'+
+      '<div style="font-size:14px;font-weight:700;color:var(--ink)">'+esc(q.name||'ללא שם')+'</div>'+
+      '<div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:4px;font-weight:400">'+
+        '<span class="pill" style="background:'+st.bg+';color:'+st.fg+'">'+esc(q.status||'בבדיקה')+'</span>'+
+        '<span style="font-size:11px">'+esc(q.kind||'')+'</span></div>'+
+      '<button class="btn sm" style="margin-top:6px;padding:4px 12px;font-size:11.5px;font-weight:600" '+
+        'data-act="q.edit" data-id="'+q.id+'">ערוך</button></th>';
+  }).join('') + '</tr>';
+
+  var body = items.map(function(item){
+    return '<tr><td style="font-size:13px;font-weight:600">'+esc(item)+'</td>' + C.map(function(c){
+      var cell = c.byCat[item];
+      if (!cell) return '<td class="qmiss">—</td>';
+      var est = cell.ext > 0;
+      var zero = cell.gross < 0.5;
+      if (zero && cell.included) return '<td class="qinc">כלול</td>';
+      if (zero && cell.blank)    return '<td class="qpend">טרם הוזן</td>';
+      return '<td class="'+(est?'qest':'')+'" style="font-size:13px;font-weight:600">'+nis(cell.gross)+
+        (est ? '<div style="font-size:10.5px;font-weight:600">הערכה</div>' : '')+'</td>';
+    }).join('') + '</tr>';
+  }).join('');
+
+  var sumRow = function(label, fn, cls, sub){
+    return '<tr class="'+(cls||'')+'"><td style="font-size:13px;font-weight:600">'+label+
+      (sub?'<div class="muted" style="font-size:11px;font-weight:400">'+sub+'</div>':'')+'</td>'+
+      C.map(function(c,i){ return '<td>'+fn(c,i)+'</td>'; }).join('')+'</tr>';
+  };
+
+  return '<div class="card" style="overflow:hidden">'+
+    '<div class="toolbar"><div style="font-size:15px;font-weight:700;flex:1">השוואה ב־'+g.toLocaleString('he-IL')+' אורחים · תרחיש '+QSCEN_HE[S.qScen]+'</div>'+
+      '<span class="qlegend"><i class="qest"></i> הערכה חיצונית</span>'+
+      '<span class="qlegend"><i class="qinc"></i> כלול במחיר</span>'+
+      '<span class="qlegend"><i class="qmiss"></i> לא טופל</span></div>'+
+    '<div class="tblscroll" style="overflow-x:auto"><table class="t qcmp"><thead>'+head+'</thead>'+
+      '<tbody>'+body+'</tbody><tfoot>'+
+      sumRow('מחיר לפי ההצעה', function(c){ return '<span style="font-size:13px">'+nis(c.quoted)+'</span>'; })+
+      sumRow('השלמות בהערכה', function(c){ return c.estimated ? '<span class="qesttx">+ '+nis(c.estimated)+'</span>' : '<span class="muted">—</span>'; },
+             '', 'מה שההצעה לא כוללת')+
+      sumRow('סה״כ מנורמל', function(c,i){
+        var d = c.total - cheapest;
+        return '<div class="qtot" style="color:'+(d<0.5?'var(--green)':'var(--ink)')+'">'+nis(c.total)+'</div>'+
+               '<div style="font-size:11.5px;color:'+(d<0.5?'var(--green)':'var(--clay)')+';font-weight:600">'+
+               (d<0.5 ? 'הזולה ביותר' : '+ '+nis(d))+'</div>';
+      }, 'qtotrow')+
+      sumRow('עלות לאורח', function(c){ return '<span style="font-size:13px;font-weight:600">'+nis(c.perGuest)+'</span>'; })+
+      sumRow('קבוע / משתנה', function(c){
+        var t = c.total || 1, fp = Math.round(c.fixed/t*100);
+        return '<div style="font-size:12px">'+nis(c.fixed)+' / '+nis(c.variable)+'</div>'+
+          '<div class="qsplit"><i style="width:'+fp+'%"></i></div>'+
+          '<div style="font-size:11px;color:var(--muted)">'+fp+'% קבוע</div>';
+      })+
+      sumRow('מינימום מחויב', function(c){
+        if (!c.minGuests) return '<span class="muted">אין</span>';
+        return '<div style="font-size:12.5px">'+c.minGuests+' אורחים</div>'+
+          '<div style="font-size:11.5px;color:var(--muted)">'+(c.minMode==='max'?'חיוב לפי המינימום':'קנס לאורח חסר')+'</div>';
+      })+
+      sumRow('כסף שנשרף על מי שלא בא', function(c){
+        return c.burnGuests ? '<span style="font-size:13px;font-weight:700;color:var(--clay)">'+nis(c.burnCost)+'</span>'+
+          '<div style="font-size:11px;color:var(--muted)">'+c.burnGuests+' אורחים חסרים</div>'
+          : '<span class="muted">—</span>';
+      })+
+      ((S.quotes||[]).some(function(q){ return qNum(q.paid,0) || qNum(q.deposit,0); }) ?
+        sumRow('שולם עד היום', function(c){
+          var p = qNum(c.quote.paid,0);
+          return '<div style="font-size:13px">'+nis(p)+'</div>'+
+                 '<div style="font-size:11px;color:var(--muted)">נותר '+nis(Math.max(0,c.total-p))+'</div>';
+        }) : '')+
+      '</tfoot></table></div></div>';
+}
+
+/* ─────────── 2. נרמול וכיסוי ─────────── */
+function qvNorm(){
+  var list = qList();
+  if (!list.length) return qvEmpty();
+  var g = qGuests(), items = qItemList();
+  var C = list.map(function(q){ return qCalc(q, g); });
+
+  var rows = items.map(function(item){
+    return '<tr><td style="font-size:13px;font-weight:600;min-width:150px">'+esc(item)+'</td>'+
+      list.map(function(q, i){
+        var lines = qLines(q.id).filter(function(l){ return l.cat === item; });
+        var st = itemState(qLines(q.id), item);
+        var cell = C[i].byCat[item];
+        var sel = '<select class="sel qcov" data-act="q.cov" data-id="'+q.id+'" data-item="'+esc(item)+'">'+
+          [['none','—'],['included','כלול'],['extra','בתוספת'],['missing','לא מכוסה']].map(function(o){
+            return '<option value="'+o[0]+'"'+(st===o[0]?' selected':'')+'>'+o[1]+'</option>';
+          }).join('')+'</select>';
+        var money = '';
+        if (st === 'extra' || st === 'missing'){
+          money = lines.length === 1
+            ? '<input type="number" class="num" style="width:82px;margin-top:5px" data-act="q.l.amount" data-id="'+lines[0].id+'" data-k="qn'+lines[0].id+'" value="'+(qNum(lines[0].amount,0)||'')+'" placeholder="0">'+
+              '<div style="font-size:10.5px;color:var(--muted);margin-top:2px">'+QCALC_HE[lines[0].calc]+' → '+nis(cell?cell.gross:0)+'</div>'
+            : '<div style="font-size:11.5px;margin-top:5px">'+lines.length+' שורות · <b>'+nis(cell?cell.gross:0)+'</b></div>';
+        }
+        return '<td class="'+(st==='missing'?'qest':st==='none'?'qmiss':'')+'" style="text-align:center">'+sel+money+'</td>';
+      }).join('')+'</tr>';
+  }).join('');
+
+  return '<div class="card" style="overflow:hidden">'+
+    '<div class="toolbar"><div style="font-size:15px;font-weight:700;flex:1">מה כל הצעה באמת כוללת</div>'+
+      '<input class="field" style="width:190px" placeholder="הוסף פריט להשוואה…" data-act="q.newItem" data-k="qNewItem" value="'+esc(S.qNewItem||'')+'">'+
+      '<button class="btn sm" data-act="q.addItem">הוסף</button></div>'+
+    '<div style="padding:12px 20px;font-size:12.5px;color:var(--muted);line-height:1.8;border-bottom:1px solid var(--line2)">'+
+      '<b>כלול</b> — בתוך המחיר, עלות 0. <b>בתוספת</b> — ההצעה נותנת את זה בתשלום נפרד. '+
+      '<b>לא מכוסה</b> — צריך להביא מבחוץ, והסכום שתזינו הוא הערכה שמתווספת לסך המנורמל ומסומנת בצהוב. '+
+      '<b>—</b> עדיין לא בדקנו.</div>'+
+    '<div class="tblscroll" style="overflow-x:auto"><table class="t qcmp"><thead><tr><th>פריט</th>'+
+      list.map(function(q,i){ return '<th style="min-width:130px;border-top:3px solid '+qColor(i)+'">'+esc(q.name||'ללא שם')+'</th>'; }).join('')+
+    '</tr></thead><tbody>'+rows+'</tbody><tfoot>'+
+      '<tr class="qtotrow"><td style="font-weight:600;font-size:13px">סה״כ מנורמל</td>'+
+        C.map(function(c){ return '<td><div class="qtot">'+nis(c.total)+'</div>'+
+          (c.estimated ? '<div class="qesttx" style="font-size:11.5px">כולל '+nis(c.estimated)+' בהערכה</div>' : '')+'</td>'; }).join('')+
+      '</tr></tfoot></table></div></div>';
+}
+
+/* ─────────── 3. גרף רגישות ─────────── */
+function qvSens(){
+  var list = qList();
+  if (!list.length) return qvEmpty();
+  var s = qScenSet();
+  var lo = qNum(setting('טווח גרף מ'),0) || Math.max(50, Math.floor(Math.min(s.pess, s.exp) * 0.65 / 25) * 25);
+  var hi = qNum(setting('טווח גרף עד'),0) || Math.max(lo + 100, Math.ceil(s.opt * 1.35 / 25) * 25);
+  var step = Math.max(1, Math.round((hi - lo) / 60));
+
+  var xs = [], n;
+  for (n = lo; n <= hi; n += step) xs.push(n);
+  if (xs[xs.length-1] !== hi) xs.push(hi);
+
+  var series = list.map(function(q, i){
+    return {q:q, color:qColor(i), ys:xs.map(function(x){ return qCalc(q, x).total; })};
+  });
+  var maxY = Math.max.apply(null, series.reduce(function(a,se){ return a.concat(se.ys); }, [1]));
+  maxY = Math.ceil(maxY * 1.06 / 10000) * 10000 || 10000;
+
+  var W = 960, H = 420, ML = 78, MR = 18, MT = 18, MB = 46;
+  var px = function(x){ return ML + (x - lo) / (hi - lo || 1) * (W - ML - MR); };
+  var py = function(y){ return MT + (1 - y / maxY) * (H - MT - MB); };
+
+  /* נקודות חיתוך — היכן שההצעה הזולה ביותר מתחלפת */
+  var cheapAt = function(idx){
+    var best = 0;
+    series.forEach(function(se, j){ if (se.ys[idx] < series[best].ys[idx]) best = j; });
+    return best;
+  };
+  var cross = [];
+  for (n = 1; n < xs.length; n++){
+    var a = cheapAt(n-1), b = cheapAt(n);
+    if (a !== b) cross.push({x:xs[n], from:series[a], to:series[b]});
+  }
+
+  var gridY = '', ticks = 5;
+  for (n = 0; n <= ticks; n++){
+    var yv = maxY * n / ticks, yy = py(yv);
+    gridY += '<line x1="'+ML+'" y1="'+yy+'" x2="'+(W-MR)+'" y2="'+yy+'" stroke="#EFEBE4"></line>'+
+      '<text x="'+(ML-8)+'" y="'+(yy+4)+'" text-anchor="end" font-size="11" fill="#8C857B">'+
+      (yv >= 1000 ? Math.round(yv/1000)+'K' : Math.round(yv))+'</text>';
+  }
+  var gridX = '';
+  for (n = 0; n <= 6; n++){
+    var xv = Math.round(lo + (hi-lo) * n / 6), xx = px(xv);
+    gridX += '<line x1="'+xx+'" y1="'+MT+'" x2="'+xx+'" y2="'+(H-MB)+'" stroke="#F4F0EA"></line>'+
+      '<text x="'+xx+'" y="'+(H-MB+18)+'" text-anchor="middle" font-size="11" fill="#8C857B">'+xv+'</text>';
+  }
+
+  /* קווי המינימום של כל הצעה + קווי התרחישים */
+  var marks = series.map(function(se){
+    var m = Math.round(qNum(se.q.minGuests,0));
+    if (!m || m < lo || m > hi) return '';
+    return '<line x1="'+px(m)+'" y1="'+MT+'" x2="'+px(m)+'" y2="'+(H-MB)+'" stroke="'+se.color+'" stroke-dasharray="3 4" opacity=".55"></line>'+
+      '<text x="'+px(m)+'" y="'+(MT+12)+'" text-anchor="middle" font-size="10" fill="'+se.color+'">מינ׳ '+m+'</text>';
+  }).join('');
+  var scen = QSCEN.map(function(x){
+    var v = s[x[0]]; if (v < lo || v > hi) return '';
+    return '<line x1="'+px(v)+'" y1="'+MT+'" x2="'+px(v)+'" y2="'+(H-MB)+'" stroke="#23201C" stroke-dasharray="2 5" opacity=".28"></line>'+
+      '<text x="'+px(v)+'" y="'+(H-MB-6)+'" text-anchor="middle" font-size="10" fill="#8C857B">'+x[1]+'</text>';
+  }).join('');
+
+  var paths = series.map(function(se){
+    var d = se.ys.map(function(y, j){ return (j?'L':'M') + px(xs[j]).toFixed(1) + ' ' + py(y).toFixed(1); }).join(' ');
+    return '<path d="'+d+'" fill="none" stroke="'+se.color+'" stroke-width="2.4" stroke-linejoin="round"></path>';
+  }).join('');
+  var dots = cross.map(function(c){
+    return '<circle cx="'+px(c.x)+'" cy="'+py(c.to.ys[xs.indexOf(c.x)])+'" r="5" fill="#FFF" stroke="'+c.to.color+'" stroke-width="2.4"></circle>';
+  }).join('');
+
+  var legend = series.map(function(se){
+    var at = qCalc(se.q, qGuests()).total;
+    return '<div style="display:flex;align-items:center;gap:8px">'+
+      '<span style="width:16px;height:3px;border-radius:2px;background:'+se.color+'"></span>'+
+      '<span style="font-size:13px;flex:1">'+esc(se.q.name||'ללא שם')+'</span>'+
+      '<span style="font-size:12.5px;font-weight:700">'+nis(at)+'</span></div>';
+  }).join('');
+
+  var notes = cross.length ? cross.map(function(c){
+    return '<li>מעל <b>'+c.x+'</b> אורחים — <b style="color:'+c.to.color+'">'+esc(c.to.q.name||'')+'</b> זולה יותר מ־'+esc(c.from.q.name||'')+'.</li>';
+  }).join('') : '<li>אין נקודת חיתוך בטווח הזה — אותה הצעה נשארת הזולה לכל אורך הסקאלה.</li>';
+
+  return '<div class="card" style="padding:18px 20px">'+
+    '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px">'+
+      '<div style="font-size:15px;font-weight:700;flex:1">עלות כוללת מנורמלת לפי מספר אורחים</div>'+
+      '<label class="qf" style="width:108px"><span>טווח מ</span><input type="number" data-act="q.rangeLo" data-k="q.rangeLo" value="'+(setting('טווח גרף מ')||'')+'" placeholder="'+lo+'"></label>'+
+      '<label class="qf" style="width:108px"><span>עד</span><input type="number" data-act="q.rangeHi" data-k="q.rangeHi" value="'+(setting('טווח גרף עד')||'')+'" placeholder="'+hi+'"></label>'+
+    '</div>'+
+    '<div dir="ltr" style="overflow-x:auto"><svg viewBox="0 0 '+W+' '+H+'" style="width:100%;min-width:600px;height:auto;display:block">'+
+      gridY + gridX + marks + scen + paths + dots +
+      '<line x1="'+ML+'" y1="'+(H-MB)+'" x2="'+(W-MR)+'" y2="'+(H-MB)+'" stroke="#E4DED4"></line>'+
+      '<text x="'+((ML+W-MR)/2)+'" y="'+(H-6)+'" text-anchor="middle" font-size="11" fill="#8C857B">מספר אורחים</text>'+
+    '</svg></div>'+
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px 24px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line3)">'+legend+'</div>'+
+    '<ul style="margin:14px 0 0;padding-inline-start:20px;font-size:13px;line-height:2;color:#4A443C">'+notes+'</ul>'+
+    '<div class="muted" style="margin-top:8px">הקווים המקווקווים הצבעוניים הם המינימום המחויב של כל הצעה — משמאלם העלות לא יורדת יותר.</div>'+
+  '</div>';
+}
+
+/* ─────────── 4. תרחישים ─────────── */
+function qvScen(){
+  var list = qList();
+  if (!list.length) return qvEmpty();
+  var s = qScenSet();
+  var cols = QSCEN.map(function(x){
+    var g = s[x[0]];
+    var res = list.map(function(q){ return qCalc(q, g); });
+    var min = Math.min.apply(null, res.map(function(c){ return c.total; }));
+    return {key:x[0], label:x[1], guests:g, res:res, min:min};
+  });
+
+  var rows = list.map(function(q, i){
+    return '<tr><td style="font-size:13.5px;font-weight:600;border-inline-start:3px solid '+qColor(i)+'">'+esc(q.name||'ללא שם')+
+      '<div class="muted" style="font-size:11.5px">'+esc(q.kind||'')+'</div></td>'+
+      cols.map(function(col){
+        var c = col.res[i], best = c.total <= col.min + 0.5;
+        return '<td'+(best?' class="qbest"':'')+'>'+
+          '<div style="font-size:14px;font-weight:700">'+nis(c.total)+'</div>'+
+          '<div style="font-size:11.5px;color:var(--muted)">'+nis(c.perGuest)+' לאורח</div>'+
+          (c.burnGuests ? '<div style="font-size:11px;color:var(--clay)">נשרף '+nis(c.burnCost)+'</div>' : '')+
+        '</td>';
+      }).join('')+'</tr>';
+  }).join('');
+
+  return '<div class="card" style="overflow:hidden">'+
+    '<div class="toolbar"><div style="font-size:15px;font-weight:700">אותה השוואה בשלושה תרחישים</div></div>'+
+    '<div class="tblscroll" style="overflow-x:auto"><table class="t qcmp"><thead><tr><th>הצעה</th>'+
+      cols.map(function(c){ return '<th style="min-width:150px"><div style="font-size:14px;color:var(--ink)">'+c.label+'</div>'+
+        '<div style="font-weight:400">'+c.guests.toLocaleString('he-IL')+' אורחים</div></th>'; }).join('')+
+    '</tr></thead><tbody>'+rows+'</tbody></table></div>'+
+    '<div class="foot"><span class="muted">התא הירוק בכל עמודה הוא ההצעה הזולה באותו תרחיש. '+
+      'אם הזוכה מתחלף בין תרחישים — כדאי להסתכל בגרף הרגישות כדי לראות איפה בדיוק נקודת המפנה.</span></div></div>';
+}
+
+/* ─────────── 5. פירוט הצעות ─────────── */
+function qvDetail(){
+  var list = qList();
+  if (!list.length) return qvEmpty();
+  var g = qGuests();
+  return '<div class="grid">' + list.map(function(q, i){
+    var c = qCalc(q, g), open = !!(S.qOpen||{})[q.id];
+    var st = QSTAT_STYLE[q.status] || QSTAT_STYLE['בבדיקה'];
+    var byCat = {};
+    c.rows.forEach(function(r){ (byCat[r.cat] = byCat[r.cat] || []).push(r); });
+
+    var lines = Object.keys(byCat).map(function(cat){
+      return '<div class="qcat"><div class="qcath">'+esc(cat)+'<span>'+
+          nis(byCat[cat].reduce(function(a,r){ return a+r.gross; },0))+'</span></div>'+
+        byCat[cat].map(function(r){
+          var tag = r.line.calc === 'included' ? '<span class="qtag qinc">כלול</span>'
+                  : r.ext ? '<span class="qtag qest">הערכה חיצונית</span>' : '';
+          if (r.blank) tag += '<span class="qtag qpend">טרם הוזן</span>';
+          return '<div class="qline">'+
+            '<div class="qlmain"><b>'+esc(r.line.desc || QCALC_HE[r.line.calc] || '')+'</b> '+tag+
+              (r.line.note ? '<div class="muted" style="font-size:11.5px">'+esc(r.line.note)+'</div>' : '')+'</div>'+
+            '<div class="qlcalc">'+esc(r.formula)+'</div>'+
+            '<div class="qlsum">'+nis(r.gross)+'</div></div>';
+        }).join('')+'</div>';
+    }).join('') || '<div class="muted" style="padding:14px 0">אין עדיין שורות עלות בהצעה הזו.</div>';
+
+    var meta = [
+      q.contact  ? ['איש קשר', q.contact] : null,
+      q.eventDate? ['תאריך האירוע', q.eventDate + (q.weekday ? ' · ' + q.weekday : '')] : (q.weekday ? ['יום', q.weekday] : null),
+      q.quoteDate? ['תאריך ההצעה', q.quoteDate] : null,
+      q.validUntil ? ['בתוקף עד', q.validUntil] : null,
+      q.minGuests ? ['מינימום', q.minGuests + ' אורחים · ' + (q.minMode==='penalty' ? 'קנס '+nis(q.penaltyPer)+' לאורח חסר' : 'חיוב לפי המינימום')] : null,
+      qNum(q.deposit,0) ? ['מקדמה', nis(q.deposit)] : null,
+      qNum(q.paid,0) ? ['שולם עד היום', nis(q.paid) + ' · נותר ' + nis(Math.max(0, c.total - qNum(q.paid,0)))] : null,
+      q.payTerms ? ['מועדי תשלום', q.payTerms] : null
+    ].filter(Boolean).map(function(m){
+      return '<div class="qmeta"><span>'+m[0]+'</span><b>'+esc(String(m[1]))+'</b></div>';
+    }).join('');
+
+    return '<div class="card" style="padding:18px 20px;border-top:3px solid '+qColor(i)+'">'+
+      '<div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap">'+
+        '<div style="flex:1;min-width:170px">'+
+          '<div class="serif" style="font-size:20px;font-weight:700">'+esc(q.name||'ללא שם')+'</div>'+
+          '<div style="display:flex;align-items:center;gap:7px;margin-top:5px;flex-wrap:wrap">'+
+            '<span class="pill" style="background:'+st.bg+';color:'+st.fg+'">'+esc(q.status||'בבדיקה')+'</span>'+
+            '<span class="muted">'+esc(q.kind||'')+'</span></div></div>'+
+        '<div style="text-align:end">'+
+          '<div class="serif" style="font-size:26px;font-weight:700">'+nis(c.total)+'</div>'+
+          '<div class="muted" style="font-size:12px">מנורמל · '+nis(c.perGuest)+' לאורח</div>'+
+          (c.estimated ? '<div class="qesttx" style="font-size:11.5px">כולל '+nis(c.estimated)+' בהערכה</div>' : '')+
+        '</div></div>'+
+      (meta ? '<div class="qmetas">'+meta+'</div>' : '')+
+      (c.burnGuests ? '<div class="qburn">על '+c.burnGuests+' אורחים שלא הגיעו נשלם '+nis(c.burnCost)+' לחינם.</div>' : '')+
+      (q.notes ? '<div class="muted" style="margin-top:10px;line-height:1.7">'+esc(q.notes)+'</div>' : '')+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--line3)">'+
+        '<button class="btn sm primary" data-act="q.edit" data-id="'+q.id+'">ערוך</button>'+
+        '<button class="btn sm" data-act="q.toggle" data-id="'+q.id+'">'+(open?'הסתר פירוט':'הצג פירוט מלא')+'</button>'+
+        '<button class="btn sm" data-act="q.dup" data-id="'+q.id+'">שכפל</button>'+
+        '<span style="flex:1"></span>'+
+        '<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">'+attachHtml('quote', q.id)+'</div>'+
+      '</div>'+
+      (open ? '<div style="margin-top:14px">'+lines+
+        '<div class="qsumline"><span>מחיר לפי ההצעה</span><b>'+nis(c.quoted)+'</b></div>'+
+        (c.estimated ? '<div class="qsumline"><span>השלמות בהערכה</span><b class="qesttx">+ '+nis(c.estimated)+'</b></div>' : '')+
+        '<div class="qsumline tot"><span>סה״כ מנורמל ב־'+g+' אורחים</span><b>'+nis(c.total)+'</b></div></div>' : '')+
+    '</div>';
+  }).join('') + '</div>';
+}
+
+/* ─────────── 6. בדיקות ─────────── */
+function qvTests(){
+  var T = runQuoteTests(), bad = T.filter(function(t){ return !t.ok; });
+  return '<div class="card" style="overflow:hidden">'+
+    '<div class="toolbar"><div style="font-size:15px;font-weight:700;flex:1">בדיקות לנוסחאות החישוב</div>'+
+      '<span class="pill" style="background:'+(bad.length?'#FBEDE6':'#EEF2EF')+';color:'+(bad.length?'#B4714E':'#3E5D50')+';font-weight:700">'+
+        (T.length-bad.length)+' / '+T.length+' עברו</span></div>'+
+    '<div style="padding:12px 20px;font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--line2)">'+
+      'הבדיקות רצות על אותן פונקציות חישוב שהלוח משתמש בהן — מדרגות, מינימום בשתי השיטות, אחוזים, מע״מ ונרמול.</div>'+
+    '<div style="padding:8px 20px 18px">'+T.map(function(t){
+      return '<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--line3)">'+
+        '<span style="width:9px;height:9px;border-radius:50%;flex:none;background:'+(t.ok?'#3E5D50':'#B4714E')+'"></span>'+
+        '<span style="font-size:13px;flex:1">'+esc(t.name)+'</span>'+
+        (t.ok ? '' : '<span style="font-size:12px;color:var(--clay)">התקבל '+esc(String(t.got))+' · ציפינו '+esc(String(t.want))+'</span>')+
+      '</div>';
+    }).join('')+'</div></div>';
+}
+
+/* ─────────── מודל עריכת הצעה ─────────── */
+function quoteModal(){
+  var q = row('quotes', S.qEdit);
+  if (!q) return '';
+  var g = qGuests(), c = qCalc(q, g), lines = qLines(q.id);
+  var items = qItemList();
+
+  var fld = function(label, act, val, type, width){
+    return '<label class="qf" style="'+(width?'min-width:'+width+'px;':'')+'flex:1"><span>'+label+'</span>'+
+      '<input '+(type?'type="'+type+'" ':'')+'data-act="'+act+'" data-id="'+q.id+'" data-k="qe'+q.id+act+'" value="'+esc(val==null?'':val)+'"></label>';
+  };
+  var selFld = function(label, act, val, opts){
+    return '<label class="qf" style="flex:1"><span>'+label+'</span>'+
+      '<select data-act="'+act+'" data-id="'+q.id+'">'+opts.map(function(o){
+        var v = o.push ? o[0] : o, t = o.push ? o[1] : o;
+        return '<option value="'+esc(v)+'"'+(String(val)===String(v)?' selected':'')+'>'+esc(t)+'</option>';
+      }).join('')+'</select></label>';
+  };
+
+  var lineRows = lines.map(function(l){
+    var r = c.rows.filter(function(x){ return x.line.id === l.id; })[0];
+    var k = 'ql'+l.id;
+    return '<div class="qlrow">'+
+      '<label class="qf" style="flex:1.1;min-width:132px"><span>קטגוריה</span>'+
+        '<input list="qitemlist" data-act="q.l.cat" data-id="'+l.id+'" data-k="'+k+'c" value="'+esc(l.cat)+'"></label>'+
+      '<label class="qf" style="flex:1.8;min-width:150px"><span>תיאור</span>'+
+        '<input data-act="q.l.desc" data-id="'+l.id+'" data-k="'+k+'d" value="'+esc(l.desc)+'"></label>'+
+      '<label class="qf" style="flex:0 0 108px"><span>סוג חישוב</span>'+
+        '<select data-act="q.l.calc" data-id="'+l.id+'">'+QCALC.map(function(o){
+          return '<option value="'+o[0]+'"'+(l.calc===o[0]?' selected':'')+'>'+o[1]+'</option>'; }).join('')+'</select></label>'+
+      (l.calc === 'included' ? '' :
+        '<label class="qf" style="flex:0 0 96px"><span>'+(l.calc==='percent'?'אחוז %':'סכום ₪')+'</span>'+
+          '<input type="number" step="any" data-act="q.l.amount" data-id="'+l.id+'" data-k="'+k+'a" value="'+(qNum(l.amount,0)||'')+'" placeholder="0"></label>')+
+      (l.calc === 'tier' ?
+        '<label class="qf" style="flex:0 0 92px"><span>יחידה לכל</span>'+
+          '<input type="number" data-act="q.l.per" data-id="'+l.id+'" data-k="'+k+'p" value="'+(Math.round(qNum(l.per,0))||'')+'" placeholder="15"></label>' : '')+
+      (l.calc === 'percent' ?
+        '<label class="qf" style="flex:0 0 130px"><span>אחוז מתוך</span>'+
+          '<select data-act="q.l.pctOf" data-id="'+l.id+'">'+['<option value="">כל השורות</option>'].concat(items.map(function(it){
+            return '<option value="'+esc(it)+'"'+(l.pctOf===it?' selected':'')+'>'+esc(it)+'</option>'; })).join('')+'</select></label>' : '')+
+      (l.calc === 'included' ? '' :
+        '<label class="qck"><input type="checkbox" class="ck" data-act="q.l.vat" data-id="'+l.id+'"'+(l.vatInc?' checked':'')+'> כולל מע״מ</label>'+
+        '<label class="qck"><input type="checkbox" class="ck" data-act="q.l.ext" data-id="'+l.id+'"'+(l.ext?' checked':'')+'> הערכה חיצונית</label>')+
+      '<div class="qlres">'+(r ? '<b>'+nis(r.gross)+'</b><i>'+esc(r.formula||'')+'</i>' : '')+'</div>'+
+      '<button class="x" data-act="q.l.del" data-id="'+l.id+'">✕</button>'+
+      '<label class="qf" style="flex:1 1 100%"><span>הערה</span>'+
+        '<input data-act="q.l.note" data-id="'+l.id+'" data-k="'+k+'n" value="'+esc(l.note||'')+'"></label>'+
+    '</div>';
+  }).join('') || '<div class="muted" style="padding:10px 0">עוד אין שורות. הוסיפו שורה, או טענו תבנית מוכנה.</div>';
+
+  return '<div class="backdrop" data-act="q.close"><div class="modal" data-stop style="width:940px">'+
+    '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px">'+
+      '<div class="serif" style="font-size:22px;font-weight:700">עריכת הצעה</div>'+
+      '<button class="x" style="font-size:20px" data-act="q.close">✕</button></div>'+
+    '<div class="muted" style="margin-bottom:16px">הכל נשמר לבד. הסכומים למטה מחושבים ב־'+g+' אורחים (תרחיש '+QSCEN_HE[S.qScen]+').</div>'+
+
+    '<div class="box"><h4>פרטי ההצעה</h4>'+
+      '<div class="qrow">'+ fld('שם ההצעה','q.name',q.name) + selFld('סוג','q.kind',q.kind,QKIND) + selFld('סטטוס','q.status',q.status,QSTATUS) +'</div>'+
+      '<div class="qrow">'+ fld('איש קשר','q.contact',q.contact) + fld('תאריך ההצעה','q.quoteDate',q.quoteDate,'date') + fld('בתוקף עד','q.validUntil',q.validUntil,'date') +'</div>'+
+      '<div class="qrow">'+ fld('תאריך האירוע','q.eventDate',q.eventDate,'date') + fld('יום בשבוע / עונה','q.weekday',q.weekday) +'</div>'+
+      '<label class="qf" style="display:block"><span>הערות</span><input data-act="q.notes" data-id="'+q.id+'" data-k="qe'+q.id+'notes" value="'+esc(q.notes||'')+'"></label>'+
+    '</div>'+
+
+    '<div class="box"><h4>מינימום אורחים</h4>'+
+      '<p>גנים ואולמות מחייבים מספר מנות מינימלי. שתי השיטות הנפוצות: חיוב לפי המספר הגבוה מבין המינימום לאורחים בפועל, או תשלום קנס על כל אורח חסר.</p>'+
+      '<div class="qrow">'+
+        fld('מינימום מחויב','q.minGuests',Math.round(qNum(q.minGuests,0))||'','number')+
+        selFld('שיטת החיוב','q.minMode',q.minMode||'max',[['max','חיוב לפי max(אורחים, מינימום)'],['penalty','קנס קבוע לכל אורח חסר']])+
+        (q.minMode === 'penalty' ? fld('קנס לאורח חסר ₪','q.penaltyPer',qNum(q.penaltyPer,0)||'','number') : '')+
+      '</div>'+
+      (q.minMode === 'penalty' ? '<label class="qck"><input type="checkbox" class="ck" data-act="q.penaltyVat" data-id="'+q.id+'"'+(q.penaltyVatInc?' checked':'')+'> סכום הקנס כולל מע״מ</label>' : '')+
+      (c.burnGuests ? '<div class="qburn" style="margin-top:10px">בתרחיש הנוכחי ('+g+' אורחים) נשלם '+nis(c.burnCost)+' על '+c.burnGuests+' אורחים שלא יגיעו.</div>'
+                    : '<div class="muted" style="margin-top:8px">בתרחיש הנוכחי אנחנו מעל המינימום — לא נשרף כסף.</div>')+
+    '</div>'+
+
+    '<div class="box"><h4>תשלומים</h4>'+
+      '<div class="qrow">'+ fld('מקדמה ₪','q.deposit',qNum(q.deposit,0)||'','number') + fld('שולם עד היום ₪','q.paid',qNum(q.paid,0)||'','number') + fld('מועדי תשלום','q.payTerms',q.payTerms) +'</div></div>'+
+
+    '<div class="box"><h4>שורות עלות</h4>'+
+      '<p>סוג החישוב קובע איך השורה מגיבה למספר האורחים: <b>קבוע</b> לא זז, <b>לפי אורח</b> מוכפל באורחים, '+
+        '<b>מדרגות</b> מחשב ceil(אורחים ÷ יחידה), <b>אחוז</b> מחושב מהשורות האחרות, ו<b>כלול</b> מסמן כיסוי בעלות 0. '+
+        'סמנו <b>הערכה חיצונית</b> בשורה שההצעה לא כוללת ואנחנו משלימים בעצמנו.</p>'+
+      '<datalist id="qitemlist">'+items.map(function(i){ return '<option value="'+esc(i)+'">'; }).join('')+'</datalist>'+
+      '<div style="display:flex;flex-direction:column;gap:10px">'+lineRows+'</div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">'+
+        '<button class="btn sm primary" data-act="q.l.add" data-id="'+q.id+'">+ שורת עלות</button>'+
+        '<button class="btn sm" data-act="q.tpl" data-id="'+q.id+'" data-tpl="גן/אולם">טען שורות תבנית גן/אולם</button>'+
+        '<button class="btn sm" data-act="q.tpl" data-id="'+q.id+'" data-tpl="שטח">טען שורות תבנית שטח</button></div>'+
+      '<div class="qsumline tot" style="margin-top:14px"><span>סה״כ מנורמל ב־'+g+' אורחים</span><b>'+nis(c.total)+'</b></div>'+
+    '</div>'+
+
+    '<div style="display:flex;gap:10px;flex-wrap:wrap">'+
+      '<button class="btn primary" data-act="q.close">סיימתי</button>'+
+      '<button class="btn" data-act="q.dup" data-id="'+q.id+'">שכפל הצעה</button>'+
+      '<span style="flex:1"></span>'+
+      '<button class="btn danger" data-act="q.del" data-id="'+q.id+'">מחק הצעה</button></div>'+
+  '</div></div>';
+}
+
+/* טעינת שורות מתבנית — לא מכפילה שורות שכבר קיימות */
+function addTplLines(quoteId, tplName){
+  var t = QTPL[tplName]; if (!t) return;
+  var have = {};
+  qLines(quoteId).forEach(function(l){ have[(l.cat||'') + '|' + (l.desc||'')] = 1; });
+  t.lines.forEach(function(r){
+    if (have[r[0] + '|' + r[1]]) return;
+    S.quoteLines.push({id:uid(), quoteId:quoteId, cat:r[0], desc:r[1], calc:r[2],
+                       amount:0, per:r[3]||0, pctOf:'', vatInc:false, ext:false, note:''});
+  });
+  var q = row('quotes', quoteId);
+  if (q && !qNum(q.minGuests,0) && t.minGuests){ q.minGuests = t.minGuests; q.minMode = t.minMode; }
+  touch();
+}
+
 /* ─────────────── מודל סנכרון ─────────────── */
 function syncModal(){
   var general = filesFor('general','').map(function(f){
@@ -1222,12 +2132,122 @@ var ACT = {
       {name:'מוזמנים', rows:guestRows()},
       {name:'ספקים',  rows:S.vendors.map(function(x){ return {'סוג':x.type,'שם':x.name,'איש קשר':x.contact,'מקדמה':x.advance,'סכום כולל':x.total,'נותר':(+x.total||0)-(+x.advance||0),'מועד תשלום':x.when,'אמצעי':x.method,'סטטוס':x.status,'הערות':x.notes}; })},
       {name:'מקומות', rows:S.venues.map(function(p){ return {'שם':p.name,'תאריך':p.date,'יום':p.day,'מחיר למנה':p.pricePer,'מינימום':p.minGuests,'תוספות':p.extras,'הערות':p.notes,'סטטוס':p.status}; })},
+      {name:'הצעות מחיר', rows:S.quotes.map(function(q){
+        var c = qCalc(q); return {'שם':q.name,'סוג':q.kind,'איש קשר':q.contact,'תאריך האירוע':q.eventDate,
+          'מינימום':q.minGuests,'שיטת מינימום':q.minMode==='penalty'?'קנס':'max','סטטוס':q.status,
+          'מחיר לפי ההצעה':Math.round(c.quoted),'השלמות בהערכה':Math.round(c.estimated),
+          'סה״כ מנורמל':Math.round(c.total),'לאורח':Math.round(c.perGuest),'הערות':q.notes};
+      })},
+      {name:'שורות עלות', rows:S.quoteLines.map(function(l){
+        var q = row('quotes', l.quoteId) || {};
+        return {'הצעה':q.name||'','קטגוריה':l.cat,'תיאור':l.desc,'סוג חישוב':QCALC_HE[l.calc]||l.calc,
+          'סכום':l.amount,'יחידה לכל':l.per,'אחוז מתוך':l.pctOf,'כולל מע״מ':l.vatInc?'כן':'',
+          'הערכה חיצונית':l.ext?'כן':'','הערה':l.note};
+      })},
       {name:'משימות', rows:S.tasks.map(function(t){ return {'משימה':t.title,'קטגוריה':t.category,'תאריך יעד':t.due,'בוצע':t.done?'כן':''}; })},
       {name:'סידור שולחנות', rows:S.guests.filter(function(g){return g.table;}).map(function(g){ return {'שם':g.name,'שולחן':g.table,'נפשות':people(g)}; })},
       {name:'קבצים', rows:(S.files||[]).map(function(f){ return {'שם הקובץ':f.name,'שייך ל':f.ownerType,'קישור':f.url}; })}
     ]);
     return false;
   },
+  /* ─── הצעות מחיר ─── */
+  'q.view':     function(el){ S.qView = el.dataset.v; return true; },
+  'q.scen':     function(el){ S.qScen = el.dataset.v; return true; },
+  'q.rejected': function(el){ S.qRejected = el.checked; return true; },
+  'q.invited':  function(el){ setSetting('מוזמנים להשוואה', el.value === '' ? '' : (+el.value||0)); return false; },
+  'q.attend':   function(el){ setSetting('אחוז הגעה צפוי',  el.value === '' ? '' : (+el.value||0)); return false; },
+  'q.vat':      function(el){ setSetting('שיעור מע״מ',      el.value === '' ? 0  : (+el.value||0)); return false; },
+  'q.pess':     function(el){ setSetting('תרחיש פסימי',     el.value === '' ? '' : (+el.value||0)); return false; },
+  'q.exp':      function(el){ setSetting('תרחיש צפוי',      el.value === '' ? '' : (+el.value||0)); return false; },
+  'q.opt':      function(el){ setSetting('תרחיש אופטימי',   el.value === '' ? '' : (+el.value||0)); return false; },
+  'q.rangeLo':  function(el){ setSetting('טווח גרף מ',      el.value === '' ? '' : (+el.value||0)); return false; },
+  'q.rangeHi':  function(el){ setSetting('טווח גרף עד',     el.value === '' ? '' : (+el.value||0)); return false; },
+  /* מסנכרן את מספר המוזמנים מהרשימה ומשחרר את שלושת התרחישים לחישוב אוטומטי */
+  'q.sync': function(){
+    setSetting('מוזמנים להשוואה', stats().totalPeople);
+    ['תרחיש פסימי','תרחיש צפוי','תרחיש אופטימי'].forEach(function(k){ S.settings[k] = ''; });
+    touch(); return true;
+  },
+
+  'q.add': function(el){
+    var tpl = el.dataset.tpl || '', t = QTPL[tpl];
+    var q = {id:uid(), name:tpl ? 'הצעה חדשה — '+tpl : 'הצעה חדשה', kind:tpl || 'אחר',
+             contact:'', quoteDate:'', validUntil:'', eventDate:'', weekday:'',
+             minGuests:t ? t.minGuests : 0, minMode:t ? t.minMode : 'max', penaltyPer:0, penaltyVatInc:false,
+             deposit:0, paid:0, payTerms:'', status:'בבדיקה', notes:''};
+    S.quotes.push(q);
+    if (t) addTplLines(q.id, tpl);
+    S.qEdit = q.id; S.qView = S.qView || 'compare';
+    touch(); return true;
+  },
+  'q.edit':   function(el){ S.qEdit = el.dataset.id; return true; },
+  'q.close':  function(){ S.qEdit = null; return true; },
+  'q.toggle': function(el){ S.qOpen = S.qOpen || {}; S.qOpen[el.dataset.id] = !S.qOpen[el.dataset.id]; return true; },
+  'q.dup': function(el){
+    var src = row('quotes', el.dataset.id); if (!src) return false;
+    var copy = Object.assign({}, src, {id:uid(), name:(src.name||'הצעה')+' — עותק', status:'בבדיקה', paid:0});
+    S.quotes.push(copy);
+    qLines(src.id).forEach(function(l){ S.quoteLines.push(Object.assign({}, l, {id:uid(), quoteId:copy.id})); });
+    S.qEdit = copy.id; touch(); return true;
+  },
+  'q.del': function(el){
+    var q = row('quotes', el.dataset.id); if (!q) return false;
+    if (!confirm('למחוק את ההצעה "'+(q.name||'')+'" ואת כל שורות העלות שלה?')) return false;
+    S.quotes = S.quotes.filter(function(x){ return x.id !== q.id; });
+    S.quoteLines = S.quoteLines.filter(function(l){ return l.quoteId !== q.id; });
+    if (S.qEdit === q.id) S.qEdit = null;
+    touch(); return true;
+  },
+
+  'q.name': f('quotes','name'), 'q.kind': f('quotes','kind'), 'q.status': f('quotes','status'),
+  'q.contact': fPhone('quotes','contact'), 'q.quoteDate': f('quotes','quoteDate'),
+  'q.validUntil': f('quotes','validUntil'), 'q.eventDate': f('quotes','eventDate'),
+  'q.weekday': f('quotes','weekday'), 'q.notes': f('quotes','notes'), 'q.payTerms': f('quotes','payTerms'),
+  'q.minGuests': f('quotes','minGuests','n'), 'q.minMode': f('quotes','minMode'),
+  'q.penaltyPer': f('quotes','penaltyPer','n'),
+  'q.penaltyVat': function(el){ upd('quotes', el.dataset.id, {penaltyVatInc:el.checked}); return true; },
+  'q.deposit': f('quotes','deposit','n'), 'q.paid': f('quotes','paid','n'),
+
+  'q.l.add': function(el){
+    S.quoteLines.push({id:uid(), quoteId:el.dataset.id, cat:'אחר', desc:'', calc:'fixed',
+                       amount:0, per:0, pctOf:'', vatInc:false, ext:false, note:''});
+    touch(); return true;
+  },
+  'q.l.del':  function(el){ del('quoteLines', el.dataset.id); return true; },
+  'q.l.cat':  f('quoteLines','cat'),   'q.l.desc': f('quoteLines','desc'),
+  'q.l.calc': f('quoteLines','calc'),  'q.l.note': f('quoteLines','note'),
+  'q.l.pctOf':f('quoteLines','pctOf'),
+  'q.l.amount': f('quoteLines','amount','n'), 'q.l.per': f('quoteLines','per','n'),
+  'q.l.vat': function(el){ upd('quoteLines', el.dataset.id, {vatInc:el.checked}); return true; },
+  'q.l.ext': function(el){ upd('quoteLines', el.dataset.id, {ext:el.checked}); return true; },
+  'q.tpl':   function(el){ addTplLines(el.dataset.id, el.dataset.tpl); return true; },
+
+  /* טבלת הנרמול: בחירת מצב כיסוי יוצרת, משנה או מוחקת את שורות העלות של אותו פריט */
+  'q.cov': function(el){
+    var qid = el.dataset.id, item = el.dataset.item, want = el.value;
+    var mine = S.quoteLines.filter(function(l){ return l.quoteId === qid && l.cat === item; });
+    if (want === 'none'){
+      S.quoteLines = S.quoteLines.filter(function(l){ return !(l.quoteId === qid && l.cat === item); });
+    } else if (!mine.length){
+      S.quoteLines.push({id:uid(), quoteId:qid, cat:item, desc:'', amount:0, per:0, pctOf:'', note:'',
+        calc: want === 'included' ? 'included' : 'fixed', vatInc:false, ext: want === 'missing'});
+    } else {
+      mine.forEach(function(l){
+        l.ext = want === 'missing';
+        if (want === 'included') l.calc = 'included';
+        else if (l.calc === 'included') l.calc = 'fixed';
+      });
+    }
+    touch(); return true;
+  },
+  'q.newItem': function(el){ S.qNewItem = el.value; return false; },
+  'q.addItem': function(){
+    var name = String(S.qNewItem||'').trim();
+    if (!name || qItemList().indexOf(name) >= 0){ S.qNewItem = ''; return true; }
+    setSetting('פריטים נוספים', qExtraItems().concat([name]).join(', '));
+    S.qNewItem = ''; return true;
+  },
+
   'import': function(el){ importFile(el); return false; }
 };
 function f(coll, key, type){
