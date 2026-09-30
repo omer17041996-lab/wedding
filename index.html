@@ -177,6 +177,14 @@
          font-weight:600;cursor:pointer;padding:2px 0}
   .qmore:hover{color:var(--clay)}
   .qshared{background:#EBEFF4;color:#5B6B7F}
+  .qvlist{display:flex;flex-direction:column;gap:2px}
+  .qvrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 10px;border-radius:9px;font-size:13px;cursor:pointer}
+  .qvrow:hover{background:var(--soft)}
+  .qvrow.off{opacity:.55}
+  .qvrow .qvname{font-weight:600}
+  .qvrow .qvcat{color:var(--muted);font-size:11.5px;background:var(--soft);border-radius:6px;padding:2px 7px}
+  .qvrow b{margin-inline-start:auto;font-size:13.5px}
+  .qvrow i{font-style:normal;font-size:11px;color:var(--faint);flex:0 0 100%;padding-inline-start:27px}
   .qlres{flex:1 1 130px;text-align:end;padding-top:17px;font-size:13px;line-height:1.35}
   .qlres i{display:block;font-style:normal;font-size:11px;color:var(--muted);unicode-bidi:plaintext}
   @media(max-width:760px){
@@ -379,11 +387,14 @@ function api(action, extra){
 
 var saveTimer = null, pending = false, inFlight = false, queued = false, saveSeq = 0;
 function touch(){                       // נקרא אחרי כל שינוי מקומי
-  persist();
+  persist();                            // לדפדפן — תמיד ומיד
   if (!CFG.token || !CFG.auto) return;
   pending = true;
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(function(){ pushNow(); }, 1500);
+  // בזמן עריכת הצעה לא רצים לשרת אחרי כל הקלדה: כל שמירה שולחת את כל
+  // הנתונים ל-Apps Script ומהבהבת את מחוון הסנכרון. ממתינים שתסיימו,
+  // ושומרים מיד כשסוגרים את חלון העריכה.
+  saveTimer = setTimeout(function(){ pushNow(); }, S.qEdit ? 15000 : 1500);
 }
 function pushNow(force){
   if (!CFG.token) return Promise.resolve();
@@ -437,7 +448,7 @@ function setNet(state, msg){ S.net = state; S.netMsg = msg||''; paintStatus(); }
 
 /* בדיקה תקופתית — אם מישהו ערך את הגיליון, מציעים לרענן */
 setInterval(function(){
-  if (!CFG.token || document.hidden || pending || inFlight || S.conflict) return;
+  if (!CFG.token || document.hidden || pending || inFlight || S.conflict || S.qEdit) return;
   var seq = saveSeq;                                   // אם שמירה שלנו הסתיימה בינתיים,
   api('rev').then(function(j){                         // המספר שקיבלנו כבר לא רלוונטי
     if (seq !== saveSeq || pending || inFlight) return;
@@ -1366,12 +1377,15 @@ function computeQuote(q, allLines, guests, vatPct){
 
   rows.forEach(function(r){ r.gross = r.net * v; });
 
-  var sum = function(pred){ return rows.reduce(function(a,r){ return pred(r) ? a + r.gross : a; }, 0); };
-  var quoted     = sum(function(r){ return !r.ext && !r.shared; });
+  var sum    = function(pred){ return rows.reduce(function(a,r){ return pred(r) ? a + r.gross : a; }, 0); };
+  var sumNet = function(pred){ return rows.reduce(function(a,r){ return pred(r) ? a + r.net   : a; }, 0); };
+  var notExt     = function(r){ return !r.ext && !r.shared; };
+  var quoted     = sum(notExt);
   var sharedCost = sum(function(r){ return  r.shared; });
   var estimated  = sum(function(r){ return  r.ext; });
   var isFixed    = function(r){ return r.line.calc === 'fixed'; };
   var total      = quoted + sharedCost + estimated;
+  var totalNet   = sumNet(function(){ return true; });
 
   var byCat = {};
   rows.forEach(function(r){
@@ -1388,6 +1402,10 @@ function computeQuote(q, allLines, guests, vatPct){
     guests:guests, billed:billed, minGuests:minG, minMode:mode,
     burnGuests:burnGuests, burnCost:burnCost,
     quoted:quoted, sharedCost:sharedCost, estimated:estimated, total:total,
+    /* אותם סכומים לפני מע״מ, ותוספת המע״מ עצמה */
+    totalNet:totalNet, vatAmount:total - totalNet,
+    quotedNet:sumNet(notExt), sharedNet:sumNet(function(r){ return r.shared; }),
+    estimatedNet:sumNet(function(r){ return r.ext; }),
     fixed: sum(isFixed), variable: sum(function(r){ return !isFixed(r); }),
     perGuest: guests ? total / guests : 0
   };
@@ -1460,6 +1478,13 @@ function runQuoteTests(){
   chk('חלק משתנה', fv.variable, 30000);
   chk('עלות לאורח', fv.perGuest, 50000/300);
 
+  /* לפני ואחרי מע״מ */
+  var vt = computeQuote(Q(), [L({calc:'fixed', amount:1000}), L({calc:'fixed', amount:1180, vatInc:true})], 100, 18);
+  chk('סה״כ לפני מע״מ', vt.totalNet, 2000);
+  chk('סה״כ כולל מע״מ', vt.total, 2360);
+  chk('סכום המע״מ הוא ההפרש', vt.vatAmount, 360);
+  chk('מע״מ 0 — אין הפרש', computeQuote(Q(), [L({calc:'fixed', amount:5000})], 100, 0).vatAmount, 0);
+
   /* עלויות קבועות המשותפות לכל ההצעות */
   var F = function(o){ return Object.assign({id:'f'+Math.random(), quoteId:QFIXED, cat:'אחר', calc:'fixed', amount:0, vatInc:false, ext:false}, o); };
   chk('עלות קבועה נכנסת להצעה',
@@ -1503,9 +1528,40 @@ function qScenSet(){
 function qGuests(){ var s = qScenSet(); return s[S.qScen] || s.exp; }
 function qLines(id){ return (S.quoteLines||[]).filter(function(l){ return l.quoteId === id; }); }
 function qFixedLines(){ return qLines(QFIXED); }
-function qFixedCats(){ var o = {}; qFixedLines().forEach(function(l){ o[l.cat||'אחר'] = 1; }); return o; }
-function qFixedCalc(){ return computeQuote({id:QFIXED, minGuests:0}, S.quoteLines, qGuests(), qVat()); }
-function qCalc(q, guests){ return computeQuote(q, S.quoteLines, guests == null ? qGuests() : guests, qVat()); }
+/* ספקים שסומנו להוצאה מההשוואה (למשל כאלה שכבר כלולים במחיר של מקום מסוים) */
+function qVendorSkip(){
+  var o = {};
+  String(setting('ספקים מוחרגים')||'').split(',').forEach(function(x){ x = x.trim(); if (x) o[x] = 1; });
+  return o;
+}
+/* הספקים שכבר סגורים בלשונית "ספקים" הם עלות אמיתית שתשולם בכל מקרה,
+   ולכן הם נכנסים לסך של כל הצעה — חי, בלי להעתיק אותם לכאן.
+   שורת עלות קבועה ידנית באותה קטגוריה גוברת, כדי לא לספור פעמיים. */
+function qVendorLines(){
+  var skip = qVendorSkip(), taken = {};
+  qFixedLines().forEach(function(l){ taken[l.cat||'אחר'] = 1; });
+  return (S.vendors||[]).filter(function(x){
+    return !skip[x.id] && (+x.total||0) > 0 && !taken[qVendorCat(x)];
+  }).map(function(x){
+    return {id:'vnd:'+x.id, quoteId:QFIXED, cat:qVendorCat(x), desc:x.name || x.type || 'ספק',
+            calc:'fixed', amount:+x.total||0, per:0, pctOf:'', vatInc:true, ext:false,
+            note:'מלשונית ספקים', vendor:true};
+  });
+}
+function qVendorCat(x){
+  var t = String(x.type||'').trim();
+  return QVENDOR_MAP[t] || t || 'אחר';
+}
+/* כל השורות שנכנסות לחישוב: מה שהוזן כאן + הספקים */
+function qAllLines(){ return (S.quoteLines||[]).concat(qVendorLines()); }
+function qFixedCats(){
+  var o = {};
+  qFixedLines().forEach(function(l){ o[l.cat||'אחר'] = 1; });
+  qVendorLines().forEach(function(l){ o[l.cat] = 1; });
+  return o;
+}
+function qFixedCalc(){ return computeQuote({id:QFIXED, minGuests:0}, qAllLines(), qGuests(), qVat()); }
+function qCalc(q, guests){ return computeQuote(q, qAllLines(), guests == null ? qGuests() : guests, qVat()); }
 function qColor(i){ return QCOLORS[i % QCOLORS.length]; }
 function qList(){   // ההצעות להשוואה — נפסלות מוסתרות אלא אם ביקשו אחרת
   return (S.quotes||[]).filter(function(q){ return S.qRejected || q.status !== 'נפסל'; });
@@ -1518,13 +1574,13 @@ function qItemList(){
   var seen = {}, out = [];
   var push = function(c){ if (c && !seen[c]){ seen[c] = 1; out.push(c); } };
   QITEMS.forEach(push); qExtraItems().forEach(push);
-  (S.quoteLines||[]).forEach(function(l){ push(l.cat); });
+  qAllLines().forEach(function(l){ push(l.cat); });
   return out;
 }
 /* רק הפריטים שמישהו כבר נגע בהם — לטבלת ההשוואה, שלא תתפוצץ בשורות ריקות */
 function qUsedItems(){
   var used = {};
-  (S.quoteLines||[]).forEach(function(l){ used[l.cat||'אחר'] = 1; });
+  qAllLines().forEach(function(l){ used[l.cat||'אחר'] = 1; });
   (S.quotes||[]).forEach(function(q){ if (q.minMode === 'penalty' && qNum(q.penaltyPer,0) > 0) used['מינימום מובטח'] = 1; });
   return qItemList().concat(['מינימום מובטח']).filter(function(c){ return used[c]; });
 }
@@ -1649,9 +1705,12 @@ function qvCompare(){
              '', 'ספקים שזהים בכל ההצעות')+
       sumRow('השלמות בהערכה', function(c){ return c.estimated ? '<span class="qesttx">+ '+nis(c.estimated)+'</span>' : '<span class="muted">—</span>'; },
              '', 'מה שההצעה לא כוללת')+
+      sumRow('סה״כ לפני מע״מ', function(c){ return '<span style="font-size:13px">'+nis(c.totalNet)+'</span>'; })+
+      sumRow('מע״מ '+qVat()+'%', function(c){ return '<span style="font-size:13px;color:var(--muted)">+ '+nis(c.vatAmount)+'</span>'; })+
       sumRow('סה״כ מנורמל', function(c,i){
         var d = c.total - cheapest;
         return '<div class="qtot" style="color:'+(d<0.5?'var(--green)':'var(--ink)')+'">'+nis(c.total)+'</div>'+
+               '<div style="font-size:10.5px;color:var(--muted)">כולל מע״מ</div>'+
                '<div style="font-size:11.5px;color:'+(d<0.5?'var(--green)':'var(--clay)')+';font-weight:600">'+
                (d<0.5 ? 'הזולה ביותר' : '+ '+nis(d))+'</div>';
       }, 'qtotrow')+
@@ -1686,26 +1745,52 @@ function qvFixed(){
   var fl = qFixedLines(), fc = qFixedCalc(), items = qItemList(), g = qGuests();
   var rows = fl.map(function(l){
     return qLineRow(l, fc.rows.filter(function(x){ return x.line.id === l.id; })[0], items);
-  }).join('') || '<div class="muted" style="padding:14px 0">עוד אין עלויות קבועות. '+
-      'אפשר לייבא את מה שכבר רשום בלשונית "ספקים", או להוסיף שורה ידנית.</div>';
+  }).join('') || '<div class="muted" style="padding:6px 0">עוד אין עלויות קבועות נוספות.</div>';
 
-  return '<div class="card" style="padding:18px 20px">'+
-    '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px">'+
-      '<div style="font-size:15px;font-weight:700">עלויות קבועות — זהות בכל ההצעות</div>'+
-      '<span style="flex:1"></span>'+
-      '<div class="serif" style="font-size:20px;font-weight:700">'+nis(fc.total)+'</div></div>'+
-    '<div class="muted" style="line-height:1.8;margin-bottom:14px">'+
-      'די־ג׳יי, צלם, איפור, מגנטים, רב — כל מה שלא תלוי במקום. רושמים פעם אחת, '+
-      'והסכום נכנס אוטומטית לכל ההצעות. '+
-      '<b>הצעה שכוללת את הפריט בעצמה גוברת</b> — אם לאולם יש הגברה משלו, סמנו אצלו '+
-      '"DJ והגברה" ככלול, והדי־ג׳יי החיצוני לא ייספר לו פעמיים.</div>'+
-    '<datalist id="qitemlist">'+items.map(function(i){ return '<option value="'+esc(i)+'">'; }).join('')+'</datalist>'+
-    '<div style="display:flex;flex-direction:column;gap:10px">'+rows+'</div>'+
-    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center">'+
-      '<button class="btn sm primary" data-act="q.f.add">+ עלות קבועה</button>'+
-      '<button class="btn sm" data-act="q.f.vendors" title="יוצר שורה לכל ספק שכבר רשום בלשונית ספקים">ייבא מלשונית ספקים</button>'+
-      '<span style="font-size:12.5px;color:var(--green)">'+esc(S.qMsg||'')+'</span></div>'+
-    '<div class="qsumline tot" style="margin-top:14px"><span>מתווסף לכל הצעה ב־'+g+' אורחים</span><b>'+nis(fc.total)+'</b></div>'+
+  /* הספקים עצמם נשארים בלשונית "ספקים" — כאן רק מסמנים מי נכנס להשוואה,
+     כדי שלא יהיו שני מקומות שבהם עורכים את אותו סכום. */
+  var skip = qVendorSkip(), taken = {};
+  qFixedLines().forEach(function(l){ taken[l.cat||'אחר'] = 1; });
+  var vend = (S.vendors||[]).filter(function(x){ return (+x.total||0) > 0 || x.name; }).map(function(x){
+    var cat = qVendorCat(x), off = !!skip[x.id], over = !off && !!taken[cat];
+    return '<label class="qvrow'+(off||over?' off':'')+'">'+
+      '<input type="checkbox" class="ck" data-act="q.v.use" data-id="'+x.id+'"'+(off?'':' checked')+(over?' disabled':'')+'>'+
+      '<span class="qvname">'+esc(x.name||x.type||'ספק')+'</span>'+
+      '<span class="qvcat">'+esc(cat)+'</span>'+
+      '<b>'+nis(+x.total||0)+'</b>'+
+      (over ? '<i>יש כאן שורה ידנית באותה קטגוריה — היא גוברת</i>' : off ? '<i>לא נספר בהשוואה</i>' : '')+
+    '</label>';
+  }).join('') || '<div class="muted">לשונית "ספקים" ריקה.</div>';
+
+  var vendTotal = qVendorLines().reduce(function(a,l){ return a + (+l.amount||0); }, 0);
+
+  return '<div class="grid">'+
+    '<div class="card" style="padding:18px 20px">'+
+      '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px">'+
+        '<div style="font-size:15px;font-weight:700">ספקים שכבר סגורים</div>'+
+        '<span style="flex:1"></span>'+
+        '<div class="serif" style="font-size:19px;font-weight:700">'+nis(vendTotal)+'</div></div>'+
+      '<div class="muted" style="line-height:1.8;margin-bottom:12px">'+
+        'הסכומים מגיעים <b>ישירות מלשונית "ספקים"</b> ונספרים בכל הצעה — משנים אותם שם, '+
+        'והשינוי מופיע כאן מיד. הם נחשבים כוללי מע״מ. '+
+        'מקום שכולל את השירות בעצמו גובר: סמנו אצלו את הפריט ככלול, והספק לא ייספר לו פעמיים.</div>'+
+      '<div class="qvlist">'+vend+'</div></div>'+
+
+    '<div class="card" style="padding:18px 20px">'+
+      '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px">'+
+        '<div style="font-size:15px;font-weight:700">עלויות קבועות נוספות</div>'+
+        '<span style="flex:1"></span>'+
+        '<div class="serif" style="font-size:19px;font-weight:700">'+nis(Math.max(0, fc.total - vendTotal))+'</div></div>'+
+      '<div class="muted" style="line-height:1.8;margin-bottom:12px">'+
+        'מה שעוד לא נסגר כספק אבל בטוח יהיה — הזמנות, רב, מתנות לאורחים. גם הן נכנסות לכל ההצעות.</div>'+
+      '<datalist id="qitemlist">'+items.map(function(i){ return '<option value="'+esc(i)+'">'; }).join('')+'</datalist>'+
+      '<div style="display:flex;flex-direction:column;gap:10px">'+rows+'</div>'+
+      '<button class="btn sm primary" style="margin-top:12px" data-act="q.f.add">+ עלות קבועה</button></div>'+
+
+    '<div class="card" style="padding:16px 20px">'+
+      '<div class="qsumline"><span>לפני מע״מ</span><b>'+nis(fc.totalNet)+'</b></div>'+
+      '<div class="qsumline"><span>מע״מ '+qVat()+'%</span><b>+ '+nis(fc.vatAmount)+'</b></div>'+
+      '<div class="qsumline tot"><span>מתווסף לכל הצעה ב־'+g+' אורחים</span><b>'+nis(fc.total)+'</b></div></div>'+
   '</div>';
 }
 
@@ -1874,6 +1959,7 @@ function qvScen(){
         var c = col.res[i], best = c.total <= col.min + 0.5;
         return '<td'+(best?' class="qbest"':'')+'>'+
           '<div style="font-size:14px;font-weight:700">'+nis(c.total)+'</div>'+
+          '<div style="font-size:11px;color:var(--faint)">'+nis(c.totalNet)+' לפני מע״מ</div>'+
           '<div style="font-size:11.5px;color:var(--muted)">'+nis(c.perGuest)+' לאורח</div>'+
           (c.burnGuests ? '<div style="font-size:11px;color:var(--clay)">נשרף '+nis(c.burnCost)+'</div>' : '')+
         '</td>';
@@ -1939,7 +2025,8 @@ function qvDetail(){
             '<span class="muted">'+esc(q.kind||'')+'</span></div></div>'+
         '<div style="text-align:end">'+
           '<div class="serif" style="font-size:26px;font-weight:700">'+nis(c.total)+'</div>'+
-          '<div class="muted" style="font-size:12px">מנורמל · '+nis(c.perGuest)+' לאורח</div>'+
+          '<div class="muted" style="font-size:12px">כולל מע״מ · '+nis(c.perGuest)+' לאורח</div>'+
+          '<div class="muted" style="font-size:11.5px">'+nis(c.totalNet)+' לפני מע״מ</div>'+
           (c.estimated ? '<div class="qesttx" style="font-size:11.5px">כולל '+nis(c.estimated)+' בהערכה</div>' : '')+
         '</div></div>'+
       (meta ? '<div class="qmetas">'+meta+'</div>' : '')+
@@ -1956,7 +2043,9 @@ function qvDetail(){
         '<div class="qsumline"><span>מחיר לפי ההצעה</span><b>'+nis(c.quoted)+'</b></div>'+
         (c.sharedCost ? '<div class="qsumline"><span>עלויות קבועות (משותפות)</span><b>+ '+nis(c.sharedCost)+'</b></div>' : '')+
         (c.estimated ? '<div class="qsumline"><span>השלמות בהערכה</span><b class="qesttx">+ '+nis(c.estimated)+'</b></div>' : '')+
-        '<div class="qsumline tot"><span>סה״כ מנורמל ב־'+g+' אורחים</span><b>'+nis(c.total)+'</b></div></div>' : '')+
+        '<div class="qsumline"><span>סה״כ לפני מע״מ</span><b>'+nis(c.totalNet)+'</b></div>'+
+        '<div class="qsumline"><span>מע״מ '+c.vat+'%</span><b>+ '+nis(c.vatAmount)+'</b></div>'+
+        '<div class="qsumline tot"><span>סה״כ כולל מע״מ ב־'+g+' אורחים</span><b>'+nis(c.total)+'</b></div></div>' : '')+
     '</div>';
   }).join('') + '</div>';
 }
@@ -2053,7 +2142,7 @@ function qModalHtml(q, c, g, items, lineRows){
         '<div class="muted" style="font-size:11.5px">'+g+' אורחים · תרחיש '+QSCEN_HE[S.qScen]+' · נשמר אוטומטית</div>'+
       '</div>'+
       '<div style="text-align:end"><div class="serif" style="font-size:20px;font-weight:700">'+nis(c.total)+'</div>'+
-        '<div class="muted" style="font-size:11px">סה״כ מנורמל</div></div>'+
+        '<div class="muted" style="font-size:11px">כולל מע״מ · '+nis(c.totalNet)+' לפניו</div></div>'+
       '<button class="btn sm primary" data-act="q.close">סיימתי</button>'+
       '<button class="x" style="font-size:20px" data-act="q.close">✕</button></div>'+
 
@@ -2087,8 +2176,10 @@ function qModalHtml(q, c, g, items, lineRows){
         '<button class="btn sm primary" data-act="q.l.add" data-id="'+q.id+'">+ שורת עלות</button>'+
         '<button class="btn sm" data-act="q.tpl" data-id="'+q.id+'" data-tpl="גן/אולם">טען שורות תבנית גן/אולם</button>'+
         '<button class="btn sm" data-act="q.tpl" data-id="'+q.id+'" data-tpl="שטח">טען שורות תבנית שטח</button></div>'+
-      (c.sharedCost ? '<div class="qsumline" style="margin-top:10px"><span>+ עלויות קבועות (משותפות לכל ההצעות)</span><b>'+nis(c.sharedCost)+'</b></div>' : '')+
-      '<div class="qsumline tot"><span>סה״כ מנורמל ב־'+g+' אורחים</span><b>'+nis(c.total)+'</b></div>'+
+      (c.sharedCost ? '<div class="qsumline" style="margin-top:10px"><span>+ עלויות קבועות וספקים (משותפים לכל ההצעות)</span><b>'+nis(c.sharedCost)+'</b></div>' : '')+
+      '<div class="qsumline"><span>סה״כ לפני מע״מ</span><b>'+nis(c.totalNet)+'</b></div>'+
+      '<div class="qsumline"><span>מע״מ '+c.vat+'%</span><b>+ '+nis(c.vatAmount)+'</b></div>'+
+      '<div class="qsumline tot"><span>סה״כ כולל מע״מ ב־'+g+' אורחים</span><b>'+nis(c.total)+'</b></div>'+
     '</div>'+
 
     '<div style="display:flex;gap:10px;flex-wrap:wrap">'+
@@ -2314,7 +2405,7 @@ var ACT = {
     touch(); return true;
   },
   'q.edit':   function(el){ S.qEdit = el.dataset.id; return true; },
-  'q.close':  function(){ S.qEdit = null; return true; },
+  'q.close':  function(){ S.qEdit = null; if (pending) pushNow(); return true; },
   'q.toggle': function(el){ S.qOpen = S.qOpen || {}; S.qOpen[el.dataset.id] = !S.qOpen[el.dataset.id]; return true; },
   'q.dup': function(el){
     var src = row('quotes', el.dataset.id); if (!src) return false;
@@ -2355,22 +2446,15 @@ var ACT = {
                        amount:0, per:0, pctOf:'', vatInc:true, ext:false, note:''});
     S.focusK = 'ql' + id + 'd'; S.qMsg = ''; touch(); return true;
   },
-  /* הספקים כבר רשומים בלשונית "ספקים" — אין סיבה להקליד אותם שוב */
-  'q.f.vendors': function(){
-    var have = {};
-    qFixedLines().forEach(function(l){ have[(l.cat||'') + '|' + (l.desc||'')] = 1; });
-    var added = 0;
-    (S.vendors||[]).forEach(function(x){
-      var type = String(x.type||'').trim();
-      var cat  = QVENDOR_MAP[type] || type || 'אחר';
-      var desc = String(x.name||'').trim();
-      if (have[cat + '|' + desc]) return;
-      S.quoteLines.push({id:uid(), quoteId:QFIXED, cat:cat, desc:desc, calc:'fixed',
-        amount:+x.total||0, per:0, pctOf:'', vatInc:true, ext:false, note:'מלשונית ספקים'});
-      have[cat + '|' + desc] = 1; added++;
-    });
-    S.qMsg = added ? 'נוספו ' + added + ' שורות מלשונית ספקים' : 'כל הספקים כבר רשומים כאן';
-    touch(); return true;
+  /* הספקים נספרים חי מלשונית "ספקים". כאן רק מוציאים ספק מההשוואה. */
+  'q.v.use': function(el){
+    var id = el.dataset.id;
+    var list = String(setting('ספקים מוחרגים')||'').split(',').map(function(x){ return x.trim(); }).filter(Boolean);
+    var i = list.indexOf(id);
+    if (el.checked && i >= 0) list.splice(i, 1);
+    if (!el.checked && i < 0) list.push(id);
+    setSetting('ספקים מוחרגים', list.join(','));
+    return true;
   },
   'q.l.noteOpen': function(el){
     S.qNote = S.qNote || {}; S.qNote[el.dataset.id] = true;
@@ -2606,7 +2690,13 @@ var QLOCAL = {};
  'q.l.add q.l.del q.l.cat q.l.desc q.l.calc q.l.note q.l.noteOpen q.l.pctOf q.l.amount ' +
  'q.l.per q.l.vat q.l.ext').split(' ').forEach(function(a){ QLOCAL[a] = 1; });
 
+/* שדות שלא משפיעים על אף חישוב — אין שום סיבה לצייר מחדש כשיוצאים מהם */
+var QQUIET = {};
+('q.l.desc q.l.note q.notes q.payTerms q.contact q.quoteDate q.validUntil q.eventDate q.weekday')
+  .split(' ').forEach(function(a){ QQUIET[a] = 1; });
+
 function reflow(act){
+  if (S.qEdit && QQUIET[act]) return;
   if (S.qEdit && QLOCAL[act] && renderModalOnly()) return;
   if (!S.qEdit && S.view === 'quotes' && act && (act.indexOf('q.l.') === 0 || act.indexOf('q.f.') === 0)
       && renderViewOnly()) return;
