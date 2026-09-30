@@ -165,10 +165,21 @@
   .qtag{font-size:10px;font-weight:700;border-radius:5px;padding:1px 6px;margin-inline-start:4px;white-space:nowrap}
   .qsumline{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:7px 10px;font-size:13px}
   .qsumline.tot{background:#F2EFE9;border-radius:10px;font-size:15px;font-weight:700}
-  .qlrow{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;border:1px solid var(--line2);border-radius:12px;padding:10px 12px;background:var(--soft)}
+  /* קבוצות בטבלאות ההשוואה: תלוי־מקום מול קבוע */
+  table.qcmp tr.qgrp td{position:static;background:#EFEBE4;text-align:right;padding:9px 14px;
+                        border-bottom:1px solid var(--line);border-top:1px solid var(--line)}
+  table.qcmp tr.qgrp b{font-size:12.5px}
+  table.qcmp tr.qgrp .muted{margin-inline-start:10px;font-size:11.5px}
+  .qgdot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-inline-end:8px}
+  table.qcmp tr.qsub td,table.qcmp tr.qsub td:first-child{background:#FAF8F5;border-bottom:1px solid var(--line)}
+  table.qcmp tr.qsub td:first-child{font-size:12.5px;font-weight:700}
+  .qlrow{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;border:1px solid var(--line2);border-radius:12px;padding:10px 12px;background:var(--card)}
   .qlrow>.x{align-self:center;padding-top:16px}
-  .qhead{position:sticky;top:0;z-index:5;background:#FFF;margin:-26px -28px 16px;padding:16px 28px 12px;
+  .modal.qmodal{width:1000px;padding:0}
+  .qbody{padding:16px 26px 26px}
+  .qhead{position:sticky;top:0;z-index:20;background:var(--card);padding:16px 26px 12px;
          border-bottom:1px solid var(--line2);border-radius:18px 18px 0 0;
+         box-shadow:0 10px 16px -12px rgba(35,32,28,.3);
          display:flex;align-items:center;gap:12px;flex-wrap:wrap}
   .qnote{align-self:center;margin-top:16px;border:1px dashed #D8D0C4;background:transparent;border-radius:8px;
          padding:5px 10px;font-size:11.5px;color:var(--muted);cursor:pointer;white-space:nowrap}
@@ -185,6 +196,7 @@
   .qvrow .qvcat{color:var(--muted);font-size:11.5px;background:var(--soft);border-radius:6px;padding:2px 7px}
   .qvrow b{margin-inline-start:auto;font-size:13.5px}
   .qvrow i{font-style:normal;font-size:11px;color:var(--faint);flex:0 0 100%;padding-inline-start:27px}
+  .qvrow .qvvat{font-size:10.5px;color:var(--faint);min-width:58px;text-align:end}
   .qlres{flex:1 1 130px;text-align:end;padding-top:17px;font-size:13px;line-height:1.35}
   .qlres i{display:block;font-style:normal;font-size:11px;color:var(--muted);unicode-bidi:plaintext}
   @media(max-width:760px){
@@ -228,7 +240,8 @@
   .spin{width:11px;height:11px;border:2px solid #D8D0C4;border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
 
   @media(max-width:900px){
-    .qhead{margin:-20px -18px 12px;padding:14px 18px 10px;gap:8px}
+    .qhead{padding:14px 16px 10px;gap:8px}
+    .qbody{padding:12px 16px 18px}
     .wrap{padding:0 14px}
     .seatgrid{grid-template-columns:1fr}
     .brand{font-size:24px}
@@ -263,7 +276,7 @@ var esc = function(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c
 var catColor = function(c){ return CAT_COLORS[c] || CAT_COLORS['אחר']; };
 var people = function(g){ return (+g.adults||0) + (+g.kids||0); };
 var DEFAULT_SETTINGS = {'תאריך החתונה':'2026-12-17', 'תקציב מתוכנן':160000,
-                        'שיעור מע״מ':18, 'אחוז הגעה צפוי':75};
+                        'שיעור מע״מ':18, 'אחוז הגעה צפוי':75, 'סכומי ספקים כוללים מעמ':'כן'};
 
 /* סבירות הגעה — שלוש רמות, וכל אחת שווה אחוז לצורך חישוב הצפי */
 var CHANCE_LEVELS = ['גבוהה','בינונית','נמוכה'];
@@ -1544,10 +1557,13 @@ function qVendorLines(){
     return !skip[x.id] && (+x.total||0) > 0 && !taken[qVendorCat(x)];
   }).map(function(x){
     return {id:'vnd:'+x.id, quoteId:QFIXED, cat:qVendorCat(x), desc:x.name || x.type || 'ספק',
-            calc:'fixed', amount:+x.total||0, per:0, pctOf:'', vatInc:true, ext:false,
+            calc:'fixed', amount:+x.total||0, per:0, pctOf:'', vatInc:qVendorVatInc(), ext:false,
             note:'מלשונית ספקים', vendor:true};
   });
 }
+/* הסכומים בלשונית "ספקים" הם המחיר שסוכם — כולל מע״מ. מי שרושם שם
+   מחירים לפני מע״מ יכול להפוך את זה במסך העלויות הקבועות. */
+function qVendorVatInc(){ return String(setting('סכומי ספקים כוללים מעמ') || 'כן').trim() !== 'לא'; }
 function qVendorCat(x){
   var t = String(x.type||'').trim();
   return QVENDOR_MAP[t] || t || 'אחר';
@@ -1653,6 +1669,23 @@ function qParams(){
     '</div></div>';
 }
 
+/* מפריד את הפריטים לשני חלקים: מה שמשתנה בין ההצעות, ומה שזהה בכולן.
+   פריט נחשב תלוי־מקום אם לפחות הצעה אחת מתמחרת אותו בעצמה. */
+function qSplitItems(items, C){
+  var venue = [], fixed = [];
+  items.forEach(function(it){
+    var own = C.some(function(c){
+      var cell = c.byCat[it];
+      return cell && cell.rows.some(function(r){ return !r.shared; });
+    });
+    (own ? venue : fixed).push(it);
+  });
+  return {venue:venue, fixed:fixed};
+}
+function qGroupSum(c, list){
+  return list.reduce(function(a, it){ var x = c.byCat[it]; return a + (x ? x.gross : 0); }, 0);
+}
+
 /* ─────────── 1. טבלת השוואה ─────────── */
 function qvCompare(){
   var list = qList();
@@ -1672,10 +1705,9 @@ function qvCompare(){
         'data-act="q.edit" data-id="'+q.id+'">ערוך</button></th>';
   }).join('') + '</tr>';
 
-  var shCats = qFixedCats();
-  var body = items.map(function(item){
-    return '<tr><td style="font-size:13px;font-weight:600">'+esc(item)+
-      (shCats[item] ? '<span class="qtag qshared">קבוע</span>' : '')+'</td>' + C.map(function(c){
+  var sp = qSplitItems(items, C), span = list.length + 1;
+  var itemRow = function(item){
+    return '<tr><td style="font-size:13px;font-weight:600">'+esc(item)+'</td>' + C.map(function(c){
       var cell = c.byCat[item];
       if (!cell) return '<td class="qmiss">—</td>';
       var est = cell.ext > 0;
@@ -1685,7 +1717,29 @@ function qvCompare(){
       return '<td class="'+(est?'qest':'')+'" style="font-size:13px;font-weight:600">'+nis(cell.gross)+
         (est ? '<div style="font-size:10.5px;font-weight:600">הערכה</div>' : '')+'</td>';
     }).join('') + '</tr>';
-  }).join('');
+  };
+  var grpRow = function(title, sub, color){
+    return '<tr class="qgrp"><td colspan="'+span+'">'+
+      '<span class="qgdot" style="background:'+color+'"></span><b>'+title+'</b>'+
+      '<span class="muted">'+sub+'</span></td></tr>';
+  };
+  /* שורת ביניים לכל קבוצה — כאן רואים מאיפה באמת מגיע ההפרש בין ההצעות */
+  var subRow = function(label, list2, mark){
+    var vals = C.map(function(c){ return qGroupSum(c, list2); });
+    var min = Math.min.apply(null, vals);
+    return '<tr class="qsub"><td>'+label+'</td>'+vals.map(function(v){
+      var d = v - min;
+      return '<td><div style="font-size:13.5px;font-weight:700">'+nis(v)+'</div>'+
+        (mark ? '<div style="font-size:11px;font-weight:600;color:'+(d<0.5?'var(--green)':'var(--clay)')+'">'+
+          (d<0.5 ? 'הזול ביותר' : '+ '+nis(d))+'</div>' : '')+'</td>';
+    }).join('')+'</tr>';
+  };
+
+  var body =
+    (sp.venue.length ? grpRow('תלוי במקום', 'זה מה שמשתנה בין ההצעות', '#B4714E') +
+        sp.venue.map(itemRow).join('') + subRow('סה״כ תלוי במקום', sp.venue, true) : '') +
+    (sp.fixed.length ? grpRow('קבוע בכל ההצעות', 'ספקים ועלויות שלא תלויים במקום — אותו סכום בכל עמודה', '#6B7A8F') +
+        sp.fixed.map(itemRow).join('') + subRow('סה״כ קבוע', sp.fixed, false) : '');
 
   var sumRow = function(label, fn, cls, sub){
     return '<tr class="'+(cls||'')+'"><td style="font-size:13px;font-weight:600">'+label+
@@ -1758,6 +1812,7 @@ function qvFixed(){
       '<span class="qvname">'+esc(x.name||x.type||'ספק')+'</span>'+
       '<span class="qvcat">'+esc(cat)+'</span>'+
       '<b>'+nis(+x.total||0)+'</b>'+
+      '<span class="qvvat">'+(qVendorVatInc()?'כולל מע״מ':'לפני מע״מ')+'</span>'+
       (over ? '<i>יש כאן שורה ידנית באותה קטגוריה — היא גוברת</i>' : off ? '<i>לא נספר בהשוואה</i>' : '')+
     '</label>';
   }).join('') || '<div class="muted">לשונית "ספקים" ריקה.</div>';
@@ -1770,10 +1825,13 @@ function qvFixed(){
         '<div style="font-size:15px;font-weight:700">ספקים שכבר סגורים</div>'+
         '<span style="flex:1"></span>'+
         '<div class="serif" style="font-size:19px;font-weight:700">'+nis(vendTotal)+'</div></div>'+
-      '<div class="muted" style="line-height:1.8;margin-bottom:12px">'+
+      '<div class="muted" style="line-height:1.8;margin-bottom:10px">'+
         'הסכומים מגיעים <b>ישירות מלשונית "ספקים"</b> ונספרים בכל הצעה — משנים אותם שם, '+
-        'והשינוי מופיע כאן מיד. הם נחשבים כוללי מע״מ. '+
+        'והשינוי מופיע כאן מיד. '+
         'מקום שכולל את השירות בעצמו גובר: סמנו אצלו את הפריט ככלול, והספק לא ייספר לו פעמיים.</div>'+
+      '<label class="qck" style="padding-top:0;margin-bottom:10px">'+
+        '<input type="checkbox" class="ck" data-act="q.v.vat"'+(qVendorVatInc()?' checked':'')+'> '+
+        'הסכומים בלשונית "ספקים" כוללים מע״מ</label>'+
       '<div class="qvlist">'+vend+'</div></div>'+
 
     '<div class="card" style="padding:18px 20px">'+
@@ -1801,7 +1859,7 @@ function qvNorm(){
   var g = qGuests(), items = qItemList();
   var C = list.map(function(q){ return qCalc(q, g); });
 
-  var rows = items.map(function(item){
+  var itemRow = function(item){
     return '<tr><td style="font-size:13px;font-weight:600;min-width:150px">'+esc(item)+'</td>'+
       list.map(function(q, i){
         var lines = qLines(q.id).filter(function(l){ return l.cat === item; });
@@ -1822,7 +1880,16 @@ function qvNorm(){
         }
         return '<td class="'+(st==='missing'?'qest':st==='none'?'qmiss':'')+'" style="text-align:center">'+sel+money+'</td>';
       }).join('')+'</tr>';
-  }).join('');
+  };
+  var sp = qSplitItems(items, C), span = list.length + 1;
+  var grpRow = function(title, sub, color){
+    return '<tr class="qgrp"><td colspan="'+span+'">'+
+      '<span class="qgdot" style="background:'+color+'"></span><b>'+title+'</b>'+
+      '<span class="muted">'+sub+'</span></td></tr>';
+  };
+  var rows =
+    (sp.venue.length ? grpRow('תלוי במקום', 'כאן קובעים מה כל הצעה כוללת', '#B4714E') + sp.venue.map(itemRow).join('') : '') +
+    (sp.fixed.length ? grpRow('קבוע בכל ההצעות', 'מגיע מהספקים ומהעלויות הקבועות', '#6B7A8F') + sp.fixed.map(itemRow).join('') : '');
 
   return '<div class="card" style="overflow:hidden">'+
     '<div class="toolbar"><div style="font-size:15px;font-weight:700;flex:1">מה כל הצעה באמת כוללת</div>'+
@@ -2135,7 +2202,7 @@ function qLineRow(l, r, items){
    יציאה: ✕, "סיימתי", או Escape. הכל נשמר תוך כדי, אין מה לאבד. */
 function qModalHtml(q, c, g, items, lineRows){
   var fld = qFld(q), selFld = qSelFld(q);
-  return '<div class="backdrop" id="qmodal"><div class="modal" data-stop style="width:1000px">'+
+  return '<div class="backdrop" id="qmodal"><div class="modal qmodal" data-stop>'+
     '<div class="qhead">'+
       '<div style="flex:1;min-width:140px">'+
         '<div class="serif" style="font-size:20px;font-weight:700;line-height:1.2">'+esc(q.name||'הצעה חדשה')+'</div>'+
@@ -2145,6 +2212,8 @@ function qModalHtml(q, c, g, items, lineRows){
         '<div class="muted" style="font-size:11px">כולל מע״מ · '+nis(c.totalNet)+' לפניו</div></div>'+
       '<button class="btn sm primary" data-act="q.close">סיימתי</button>'+
       '<button class="x" style="font-size:20px" data-act="q.close">✕</button></div>'+
+
+    '<div class="qbody">'+
 
     /* רק מה שבאמת צריך כדי להשוות. כל השאר — תאריכים, איש קשר, תשלומים —
        מתקפל, כי בשלב ההשוואה זה לא משנה את המספר. */
@@ -2187,6 +2256,7 @@ function qModalHtml(q, c, g, items, lineRows){
       '<button class="btn" data-act="q.dup" data-id="'+q.id+'">שכפל הצעה</button>'+
       '<span style="flex:1"></span>'+
       '<button class="btn danger" data-act="q.del" data-id="'+q.id+'">מחק הצעה</button></div>'+
+    '</div>'+
   '</div></div>';
 }
 
@@ -2447,6 +2517,7 @@ var ACT = {
     S.focusK = 'ql' + id + 'd'; S.qMsg = ''; touch(); return true;
   },
   /* הספקים נספרים חי מלשונית "ספקים". כאן רק מוציאים ספק מההשוואה. */
+  'q.v.vat': function(el){ setSetting('סכומי ספקים כוללים מעמ', el.checked ? 'כן' : 'לא'); return true; },
   'q.v.use': function(el){
     var id = el.dataset.id;
     var list = String(setting('ספקים מוחרגים')||'').split(',').map(function(x){ return x.trim(); }).filter(Boolean);
